@@ -1,27 +1,24 @@
 package com.example.izi.habits;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -42,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     MyAdapter mAdapter;
     ItemTouchHelper.SimpleCallback simpleCallback;
     ItemTouchHelper itemTouchHelper;
+    AlertDialog.Builder mAlertDialogBuilder;
+    EditText mAlertDialogEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         // for the Adapter
         mDB = mSQL.getReadableDatabase();
         mCursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
-        mAdapter = new MyAdapter(mCursor);
+        mAdapter = new MyAdapter(this, mCursor);
         mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
 
@@ -70,6 +69,22 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
+        initAlertDialog();
+    }
+
+    @NonNull
+    private void initAlertDialog() {
+
+        mAlertDialogEditText = (EditText) LayoutInflater.from(this).inflate(R.layout.alert_dialog, null);
+        mAlertDialogBuilder = new AlertDialog.Builder(this);
+        mAlertDialogBuilder.setTitle("Edit Habit");
+
+    }
+
+    public void buildAlertDialog(String habit){
+        mAlertDialogEditText.setText(habit);
+        mAlertDialogBuilder.setView(mAlertDialogEditText);
+        mAlertDialogBuilder.show();
     }
 
     private Button getPlusButton() {
@@ -101,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
     @NonNull
     private ItemTouchHelper.SimpleCallback getSimpleCallback() {
-        return new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        return new ItemTouchHelper.SimpleCallback(0,  ItemTouchHelper.RIGHT) {
 
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
@@ -183,4 +198,5 @@ public class MainActivity extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
+
 }

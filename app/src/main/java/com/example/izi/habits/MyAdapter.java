@@ -1,5 +1,6 @@
 package com.example.izi.habits;
 
+import android.content.Context;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.os.Handler;
@@ -15,9 +16,11 @@ import android.widget.Toast;
 
 public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
 
+    Context mContext;
     Cursor mCursor;
 
-    public MyAdapter(Cursor cursor){
+    public MyAdapter(Context context, Cursor cursor){
+        mContext = context;
         mCursor = cursor;
     }
 
@@ -32,14 +35,14 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ConstraintLayout constraintLayout = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.main_row, parent, false);
-        MyViewHolder myViewHolder = new MyViewHolder(constraintLayout);
+        MyViewHolder myViewHolder = new MyViewHolder(mContext, constraintLayout);
         return myViewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        ((Button) holder.mLayout.findViewById(R.id.habit) ).setText(mCursor.getString(1));
+        holder.mHabit.setText(mCursor.getString(1));
     }
 
     @Override
