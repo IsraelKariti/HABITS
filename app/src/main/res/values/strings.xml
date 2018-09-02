@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">HABITS</string>
     <string name="habit">habit</string>
+    <string name="snackbarMessage">Item deleted</string>
+    <string name="snackbarButton">UNDO</string>
 </resources>

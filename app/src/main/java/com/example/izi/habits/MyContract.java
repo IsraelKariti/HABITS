@@ -13,7 +13,7 @@ public class MyContract {
 
         public static final String COMMA = " , ";
         public static final String CREATE_TABLE = "CREATE TABLE "+ TABLE_NAME + " ( "+
-                _ID + " INTEGER PRIMARY KEY AUTOINCREMENT " + COMMA +
+                _ID + " INTEGER PRIMARY KEY " + COMMA +
                 COLUMN_HABIT_NAME + " TEXT " +
                 " ) ";
     }

@@ -12,8 +12,9 @@ import android.widget.Button;
 
 public class MyViewHolder extends RecyclerView.ViewHolder {
 
-    Context mContext;
+    public Context mContext;
     public Button mButtonHabit;
+    public int position;
 
     public MyViewHolder(Context context, Button btn) {
         super(btn);

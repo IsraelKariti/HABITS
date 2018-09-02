@@ -14,6 +14,8 @@ import android.graphics.drawable.VectorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -33,6 +35,7 @@ import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
 
 public class MainActivity extends AppCompatActivity {
+    CoordinatorLayout coordinatorLayout;
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -42,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     MyAdapter mAdapter;
     ItemTouchHelper.SimpleCallback simpleCallback;
     ItemTouchHelper itemTouchHelper;
+    String mDeletedHabit;
+    int mDeletedHabitDbId;
     AlertDialog.Builder mAlertDialogBuilder;
     AlertDialog mAlertDialog;
 
@@ -49,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        coordinatorLayout = findViewById(R.id.coordinator);
 
         mSQL = new SQL(this, null, null, 1);
 
@@ -136,17 +142,38 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-
-                // get the habit id
+                // get the habit _ID in the database ; viewHolder internally calls MyAdapter.getItemId(position) ;
                 int id = (int) viewHolder.getItemId();
 
-                if(direction == ItemTouchHelper.RIGHT){
-                    // look for the text in the database and delete it
+                    // save habit before deletion (for UNDO button)
+                    mDeletedHabit = ((MyViewHolder)viewHolder).mButtonHabit.getText().toString();
+
+                    mDB = mSQL.getReadableDatabase();
+                    Cursor cursor = mDB.query(TABLE_NAME, new String[]{_ID}, COLUMN_HABIT_NAME+"=?", new String[]{mDeletedHabit}, null, null, null);
+                    cursor.moveToFirst();
+                    mDeletedHabitDbId = cursor.getInt(0);
+
+                    // delete habit
                     mDB = mSQL.getWritableDatabase();
                     mDB.delete(TABLE_NAME, _ID+"=?", new String[]{String.valueOf(id)});
                     updateHabitsCursor();
                     mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-                }
+
+                    Snackbar snackbar = Snackbar.make(coordinatorLayout, R.string.snackbarMessage , Snackbar.LENGTH_LONG);
+                    snackbar.setAction(R.string.snackbarButton, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mDB = mSQL.getWritableDatabase();
+                            ContentValues cv = new ContentValues();
+                            cv.put(_ID, mDeletedHabitDbId);
+                            cv.put(COLUMN_HABIT_NAME, mDeletedHabit);
+                            mDB.insertWithOnConflict(TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+
+                            updateHabitsCursor();
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
+                    snackbar.show();
             }
 
             @Override

@@ -43,6 +43,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         mCursor.moveToPosition(position);
         holder.mButtonHabit.setText(mCursor.getString(1));
+        holder.position = position;
     }
 
     @Override
