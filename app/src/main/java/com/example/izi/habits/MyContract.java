@@ -17,4 +17,26 @@ public class MyContract {
                 COLUMN_HABIT_NAME + " TEXT " +
                 " ) ";
     }
+
+    public class LogTable{
+        public static final String LOG_TABLE_NAME = "LOG";
+
+        public static final String LOG_COLUMN_ID = BaseColumns._ID;
+        public static final String LOG_COLUMN_TOTAL_DAY = "TotalDay";
+        public static final String LOG_COLUMN_YEAR = "Year";
+        public static final String LOG_COLUMN_MONTH = "Month";
+        public static final String LOG_COLUMN_DAY = "Day";
+
+        public static final String LOG_TEXT = " TEXT ";
+        public static final String LOG_INT = " INTEGER ";
+
+        public static final String COMMA = " , ";
+        public static final String LOG_CREATE_TABLE = "CREATE TABLE "+ LOG_TABLE_NAME + " ( "+
+                LOG_COLUMN_ID + LOG_INT +" PRIMAREY KEY "+COMMA +
+                LOG_COLUMN_TOTAL_DAY + LOG_INT +COMMA+
+                LOG_COLUMN_YEAR + LOG_INT + COMMA+
+                LOG_COLUMN_MONTH + LOG_INT + COMMA+
+                LOG_COLUMN_DAY + LOG_INT + " )";
+    }
+
 }

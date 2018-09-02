@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import static com.example.izi.habits.MyContract.LogTable.LOG_CREATE_TABLE;
 import static com.example.izi.habits.MyContract.MainTable.CREATE_TABLE;
 
 public class SQL extends SQLiteOpenHelper {
@@ -16,7 +17,9 @@ public class SQL extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
+
         sqLiteDatabase.execSQL(CREATE_TABLE);
+        sqLiteDatabase.execSQL(LOG_CREATE_TABLE);
     }
 
     @Override

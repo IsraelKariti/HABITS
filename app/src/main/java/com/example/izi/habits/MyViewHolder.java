@@ -38,10 +38,16 @@ public class MyViewHolder extends RecyclerView.ViewHolder {
                     v.vibrate(100);
                 }
 
-                // ALERTDIALOG
+                // ALERT DIALOG
                 MainActivity mainActivity = (MainActivity) mContext;
                 mainActivity.buildAlertDialog(mButtonHabit.getText().toString());
                 return true;
+            }
+        });
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
         return btn;
