@@ -31,19 +31,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
 
 public class MainActivity extends AppCompatActivity {
-    CoordinatorLayout coordinatorLayout;
+    public CoordinatorLayout mCoordinatorLayout;
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
     EditText mEditText;
     Button mPlusButton;
     RecyclerView mRecyclerView;
-    MyAdapter mAdapter;
+    public MyAdapter mAdapter;
     ItemTouchHelper.SimpleCallback simpleCallback;
     ItemTouchHelper itemTouchHelper;
     String mDeletedHabit;
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        coordinatorLayout = findViewById(R.id.coordinator);
+        mCoordinatorLayout = findViewById(R.id.coordinator);
 
         mSQL = new SQL(this, null, null, 1);
 
@@ -75,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         // for the SWIPE
-        simpleCallback = getSimpleCallback();
+        simpleCallback = new MyItemTouchCallback(this, 0,  ItemTouchHelper.RIGHT);
+
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
@@ -132,81 +134,6 @@ public class MainActivity extends AppCompatActivity {
         return editText;
     }
 
-    @NonNull
-    private ItemTouchHelper.SimpleCallback getSimpleCallback() {
-        return new ItemTouchHelper.SimpleCallback(0,  ItemTouchHelper.RIGHT) {
-
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                return true;
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                // get the habit _ID in the database ; viewHolder internally calls MyAdapter.getItemId(position) ;
-                int id = (int) viewHolder.getItemId();
-
-                    // save habit before deletion (for UNDO button)
-                    mDeletedHabit = ((MyViewHolder)viewHolder).mButtonHabit.getText().toString();
-
-                    mDB = mSQL.getReadableDatabase();
-                    Cursor cursor = mDB.query(TABLE_NAME, new String[]{_ID}, COLUMN_HABIT_NAME+"=?", new String[]{mDeletedHabit}, null, null, null);
-                    cursor.moveToFirst();
-                    mDeletedHabitDbId = cursor.getInt(0);
-
-                    // delete habit
-                    mDB = mSQL.getWritableDatabase();
-                    mDB.delete(TABLE_NAME, _ID+"=?", new String[]{String.valueOf(id)});
-                    updateHabitsCursor();
-                    mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-
-                    Snackbar snackbar = Snackbar.make(coordinatorLayout, R.string.snackbarMessage , Snackbar.LENGTH_LONG);
-                    snackbar.setAction(R.string.snackbarButton, new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            mDB = mSQL.getWritableDatabase();
-                            ContentValues cv = new ContentValues();
-                            cv.put(_ID, mDeletedHabitDbId);
-                            cv.put(COLUMN_HABIT_NAME, mDeletedHabit);
-                            mDB.insertWithOnConflict(TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-
-                            updateHabitsCursor();
-                            mAdapter.notifyDataSetChanged();
-                        }
-                    });
-                    snackbar.show();
-            }
-
-            @Override
-            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
-                super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
-
-                Button btnHabit = (Button) viewHolder.itemView;
-                float y = btnHabit.getY();
-                float height = btnHabit.getHeight();
-
-                //draw red background
-                Rect rect = new Rect(0, (int)y, (int)dX, (int)(y+height) );
-                Paint paint = new Paint();
-                paint.setColor(Color.parseColor("#ffD32F2F"));
-                c.drawRect(rect, paint);
-
-                // draw trashcan icon
-                VectorDrawable vd = (VectorDrawable) ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_delete_white_24dp);
-                float vd_width = vd.getIntrinsicWidth();
-                float vd_height = vd.getIntrinsicHeight();
-                float scale = height / vd_height;
-
-
-                if(dX < vd_width*scale)
-                   vd.setBounds(0,(int)y, (int)dX, (int)(y+height));
-                else
-                    vd.setBounds(0, (int)y, (int)(vd_width*scale),(int)(y+height));
-                vd.draw(c);
-            }
-        };
-    }
-
     public void add_habit(View view){
 
         String habit = mEditText.getText().toString().trim();
@@ -226,7 +153,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void updateHabitsCursor(){
+    public void updateHabitsCursor(){
         mCursor.close();
         mCursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
         mAdapter.setCursor(mCursor);
@@ -235,5 +162,10 @@ public class MainActivity extends AppCompatActivity {
     private void closeSoftKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+    }
+
+    public void newLog(ContentValues cv){
+        mDB = mSQL.getWritableDatabase();
+        mDB.insertWithOnConflict(LOG_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
     }
 }
