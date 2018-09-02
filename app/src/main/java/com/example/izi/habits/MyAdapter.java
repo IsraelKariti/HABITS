@@ -34,15 +34,15 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ConstraintLayout constraintLayout = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.main_row, parent, false);
-        MyViewHolder myViewHolder = new MyViewHolder(mContext, constraintLayout);
+        Button buttonHabit = (Button) LayoutInflater.from(parent.getContext()).inflate(R.layout.main_row, parent, false);
+        MyViewHolder myViewHolder = new MyViewHolder(mContext, buttonHabit);
         return myViewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        holder.mHabit.setText(mCursor.getString(1));
+        holder.mButtonHabit.setText(mCursor.getString(1));
     }
 
     @Override

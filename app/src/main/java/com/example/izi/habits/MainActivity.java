@@ -3,6 +3,7 @@ package com.example.izi.habits;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
@@ -18,8 +19,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -40,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     ItemTouchHelper.SimpleCallback simpleCallback;
     ItemTouchHelper itemTouchHelper;
     AlertDialog.Builder mAlertDialogBuilder;
-    EditText mAlertDialogEditText;
+    AlertDialog mAlertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,22 +72,31 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
-        initAlertDialog();
-    }
-
-    @NonNull
-    private void initAlertDialog() {
-
-        mAlertDialogEditText = (EditText) LayoutInflater.from(this).inflate(R.layout.alert_dialog, null);
+        // init Alert Dialog
         mAlertDialogBuilder = new AlertDialog.Builder(this);
         mAlertDialogBuilder.setTitle("Edit Habit");
-
     }
 
-    public void buildAlertDialog(String habit){
-        mAlertDialogEditText.setText(habit);
-        mAlertDialogBuilder.setView(mAlertDialogEditText);
-        mAlertDialogBuilder.show();
+    public void buildAlertDialog(final String habit){
+        final EditText editText = (EditText) LayoutInflater.from(this).inflate(R.layout.alert_dialog, null);
+        editText.setText(habit);
+        editText.setSelection(editText.getText().length());
+        mAlertDialogBuilder.setView(editText);
+        mAlertDialogBuilder.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mDB = mSQL.getWritableDatabase();
+                ContentValues cv = new ContentValues();
+                cv.put(COLUMN_HABIT_NAME, editText.getText().toString());
+                mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{habit});
+                updateHabitsCursor();
+                mAdapter.notifyDataSetChanged();
+                dialogInterface.dismiss();
+            }
+        });
+        mAlertDialog = mAlertDialogBuilder.create();
+        mAlertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        mAlertDialog.show();
     }
 
     private Button getPlusButton() {
@@ -97,7 +109,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
         return btn;
     }
 
@@ -136,16 +147,15 @@ public class MainActivity extends AppCompatActivity {
                     updateHabitsCursor();
                     mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
                 }
-
             }
 
             @Override
             public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
-                ConstraintLayout layout = (ConstraintLayout) viewHolder.itemView;
-                float y = layout.getY();
-                float height = layout.getHeight();
+                Button btnHabit = (Button) viewHolder.itemView;
+                float y = btnHabit.getY();
+                float height = btnHabit.getHeight();
 
                 //draw red background
                 Rect rect = new Rect(0, (int)y, (int)dX, (int)(y+height) );
@@ -198,5 +208,4 @@ public class MainActivity extends AppCompatActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
-
 }

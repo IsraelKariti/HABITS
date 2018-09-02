@@ -13,33 +13,33 @@ import android.widget.Button;
 public class MyViewHolder extends RecyclerView.ViewHolder {
 
     Context mContext;
-    public Button mHabit;
+    public Button mButtonHabit;
 
-    public MyViewHolder(Context context, View itemView) {
-        super(itemView);
+    public MyViewHolder(Context context, Button btn) {
+        super(btn);
         mContext = context;
-        mHabit = getHabitButton((ConstraintLayout) itemView);
+        mButtonHabit = createButtonHabit(btn);
     }
 
-    private Button getHabitButton(ConstraintLayout itemView) {
-        Button btn = itemView.findViewById(R.id.habit);
+    // create the button which holds the habit and set its functionality
+    private Button createButtonHabit(Button btn) {
         btn.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
-                Log.i("ii", "LONKLIK");
 
                 // VIBRATE
-                Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+                Vibrator v = (Vibrator) view.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+                // Vibrate for 500 milliseconds
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    v.vibrate(VibrationEffect.createOneShot(150,VibrationEffect.DEFAULT_AMPLITUDE));
+                    v.vibrate(VibrationEffect.createOneShot(100,VibrationEffect.DEFAULT_AMPLITUDE));
                 }else{
                     //deprecated in API 26
-                    v.vibrate(150);
+                    v.vibrate(100);
                 }
-                Log.i("IZII", "VIBRATEEEEEEEEEEEEEEE");
+
                 // ALERTDIALOG
                 MainActivity mainActivity = (MainActivity) mContext;
-                mainActivity.buildAlertDialog(mHabit.getText().toString());
+                mainActivity.buildAlertDialog(mButtonHabit.getText().toString());
                 return true;
             }
         });
