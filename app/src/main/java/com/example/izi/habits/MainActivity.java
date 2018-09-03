@@ -36,6 +36,8 @@ import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
 
+
+//TODO if user finished editing with empty
 public class MainActivity extends AppCompatActivity {
     public CoordinatorLayout mCoordinatorLayout;
     SQL mSQL;
@@ -76,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         // for the SWIPE
-        simpleCallback = new MyItemTouchCallback(this, 0,  ItemTouchHelper.RIGHT);
+        simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
 
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
@@ -84,41 +86,6 @@ public class MainActivity extends AppCompatActivity {
         // init Alert Dialog
         mAlertDialogBuilder = new AlertDialog.Builder(this);
         mAlertDialogBuilder.setTitle("Edit Habit");
-    }
-
-    public void buildAlertDialog(final String habit){
-        final EditText editText = (EditText) LayoutInflater.from(this).inflate(R.layout.alert_dialog, null);
-        editText.setText(habit);
-        editText.setSelection(editText.getText().length());
-        mAlertDialogBuilder.setView(editText);
-        mAlertDialogBuilder.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                mDB = mSQL.getWritableDatabase();
-                ContentValues cv = new ContentValues();
-                cv.put(COLUMN_HABIT_NAME, editText.getText().toString());
-                mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{habit});
-                updateHabitsCursor();
-                mAdapter.notifyDataSetChanged();
-                dialogInterface.dismiss();
-            }
-        });
-        mAlertDialog = mAlertDialogBuilder.create();
-        mAlertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        mAlertDialog.show();
-    }
-
-    private Button getPlusButton() {
-        Button btn = findViewById(R.id.button);
-        btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                if(b){
-                    add_habit(view);
-                }
-            }
-        });
-        return btn;
     }
 
     private EditText getEditText() {
@@ -132,6 +99,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         return editText;
+    }
+
+    private Button getPlusButton() {
+        Button btn = findViewById(R.id.button);
+        btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                if(b){
+                    add_habit(view);
+                }
+            }
+        });
+        return btn;
     }
 
     public void add_habit(View view){
@@ -151,6 +131,34 @@ public class MainActivity extends AppCompatActivity {
             updateHabitsCursor();
             Toast.makeText(MainActivity.this, "Habit was added", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public void buildAlertDialog(final String habit){
+        final EditText editText = (EditText) LayoutInflater.from(this).inflate(R.layout.alert_dialog, null);
+        editText.setText(habit);
+        editText.setSelection(editText.getText().length());
+        mAlertDialogBuilder.setView(editText);
+        mAlertDialogBuilder.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mDB = mSQL.getWritableDatabase();
+                ContentValues cv = new ContentValues();
+                // if user left edittext empty restore original habit
+                if (editText.getText().toString().isEmpty()) {
+                    // doSomething
+                    editText.setText(habit);
+                }
+                cv.put(COLUMN_HABIT_NAME, editText.getText().toString());
+                mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{habit});
+                updateHabitsCursor();
+                //mAdapter.notifyDataSetChanged(); // i can't understand why this line doesnt cause recycler view to redraw
+                mRecyclerView.setAdapter(mAdapter);// use this line instead
+                dialogInterface.dismiss();
+            }
+        });
+        mAlertDialog = mAlertDialogBuilder.create();
+        mAlertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        mAlertDialog.show();
     }
 
     public void updateHabitsCursor(){
