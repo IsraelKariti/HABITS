@@ -77,6 +77,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
         mCursor.moveToPosition(position);
         ((Button)holder.itemView).setText(mCursor.getString(1));
         holder.position = position;
+        holder.databaseId = mCursor.getInt(0);
     }
 
     @Override

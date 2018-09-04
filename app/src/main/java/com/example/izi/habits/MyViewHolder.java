@@ -24,6 +24,7 @@ public class MyViewHolder extends RecyclerView.ViewHolder {
 
     public Context mContext;
     public int position;
+    public int databaseId;
 
     public MyViewHolder(Context context, Button btn) {
         super(btn);
