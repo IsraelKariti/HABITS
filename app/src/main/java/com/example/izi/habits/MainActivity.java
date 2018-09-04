@@ -35,9 +35,8 @@ import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
-
-
-//TODO if user finished editing with empty
+// TODO change swipe to delete to alertdialog to confirm delete
+//TODO when delete also delete from LOG TABLE
 public class MainActivity extends AppCompatActivity {
     public CoordinatorLayout mCoordinatorLayout;
     SQL mSQL;
@@ -49,8 +48,6 @@ public class MainActivity extends AppCompatActivity {
     public MyAdapter mAdapter;
     ItemTouchHelper.SimpleCallback simpleCallback;
     ItemTouchHelper itemTouchHelper;
-    String mDeletedHabit;
-    int mDeletedHabitDbId;
     AlertDialog.Builder mAlertDialogBuilder;
     AlertDialog mAlertDialog;
 
@@ -117,20 +114,25 @@ public class MainActivity extends AppCompatActivity {
     public void add_habit(View view){
 
         String habit = mEditText.getText().toString().trim();
-
+        // check if user is trying to add an empty habit
         if(habit.matches("")){
             Toast.makeText(MainActivity.this, "Write a habit, don't be shy", Toast.LENGTH_SHORT).show();
             return;
         }
-        else{
-            mDB = mSQL.getWritableDatabase();
-            ContentValues cv = new ContentValues();
-            cv.put(COLUMN_HABIT_NAME, habit);
-            mDB.insertWithOnConflict(TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
-            mEditText.setText("");
-            updateHabitsCursor();
-            Toast.makeText(MainActivity.this, "Habit was added", Toast.LENGTH_SHORT).show();
+        // check if user entered a habit which already exist in database
+        mDB = mSQL.getReadableDatabase();
+        Cursor cursor = mDB.query(TABLE_NAME, new String[]{"*"}, COLUMN_HABIT_NAME+"=?", new String[]{habit}, null, null, null );
+        if(cursor.getCount() != 0){
+            Toast.makeText(MainActivity.this, "Habit already exist", Toast.LENGTH_SHORT).show();
+            return;
         }
+        mDB = mSQL.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_HABIT_NAME, habit);
+        mDB.insertWithOnConflict(TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+        mEditText.setText("");
+        updateHabitsCursor();
+        Toast.makeText(MainActivity.this, "Habit was added", Toast.LENGTH_SHORT).show();
     }
 
     public void buildAlertDialog(final String habit){

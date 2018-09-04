@@ -124,9 +124,11 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
             // delete habit
             mDB = mSQL.getWritableDatabase();
             mDB.delete(TABLE_NAME, _ID+"=?", new String[]{String.valueOf(id)});
-            mainActivity.updateHabitsCursor();
-            mainActivity.mAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
 
+            mainActivity.updateHabitsCursor();
+            mainActivity.mAdapter.notifyItemRemoved(((MyViewHolder) viewHolder).position);
+
+            // Snackbar to UNDO the delete
             Snackbar snackbar = Snackbar.make(mainActivity.mCoordinatorLayout, R.string.snackbarMessage , Snackbar.LENGTH_LONG);
             snackbar.setAction(R.string.snackbarButton, new View.OnClickListener() {
                 @Override
@@ -143,7 +145,7 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
             });
             snackbar.show();
         }
-        // EDIT
+        // EDIT the habit
         else{
             // VIBRATE
             Vibrator v = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
