@@ -10,10 +10,14 @@ import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
+
+import com.example.izi.habits.Interface.DragInterface;
 
 import java.util.Calendar;
 
@@ -27,50 +31,32 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
 
     Context mContext;
     Cursor mCursor;
-
-    public MyAdapter(Context context, Cursor cursor){
+    DragInterface mDragInterface;
+    public MyAdapter(Context context, Cursor cursor, DragInterface dragInterface){
         mContext = context;
         mCursor = cursor;
+        mDragInterface = dragInterface;
     }
 
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Button buttonHabit = (Button) LayoutInflater.from(parent.getContext()).inflate(R.layout.main_row, parent, false);
-        MyViewHolder myViewHolder = new MyViewHolder(mContext, buttonHabit);
-        myViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String habit = ((Button) view).getText().toString();
-
-                Calendar calendar = Calendar.getInstance();
-                int year = calendar.get(Calendar.YEAR);
-                int month = calendar.get(Calendar.MONTH);
-                int day = calendar.get(Calendar.DAY_OF_MONTH);
-                int dayOfYear = calendar.get(Calendar.DAY_OF_YEAR);
-
-                long totalDay = year*365+dayOfYear;
-
-                ContentValues cv = new ContentValues();
-                cv.put(LOG_COLUMN_TOTAL_DAY, totalDay);
-                cv.put(LOG_COLUMN_YEAR, year);
-                cv.put(LOG_COLUMN_MONTH, month);
-                cv.put(LOG_COLUMN_DAY, day);
-                cv.put(LOG_COLUMN_HABIT, habit);
-
-                MainActivity mainActivity = (MainActivity) mContext;
-                mainActivity.newLog(cv);
-            }
-        });
+        ConstraintLayout layout = (ConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.main_row, parent, false);
+        MyViewHolder myViewHolder = new MyViewHolder(mContext, layout);
         return myViewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        ((Button)holder.itemView).setText(mCursor.getString(1));
-        holder.position = position;
-        holder.databaseId = mCursor.getInt(0);
+        ((Button)holder.habit).setText(mCursor.getString(1));
+        ((ImageView)holder.habdle).setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                mDragInterface.beginDrag(holder);
+                return false;
+            }
+        });
     }
 
     @Override

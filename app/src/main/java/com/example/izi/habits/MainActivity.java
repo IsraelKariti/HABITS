@@ -31,13 +31,15 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.izi.habits.Interface.DragInterface;
+
 import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
 // TODO change swipe to delete to alertdialog to confirm delete
 //TODO when delete also delete from LOG TABLE
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DragInterface{
     public CoordinatorLayout mCoordinatorLayout;
     SQL mSQL;
     SQLiteDatabase mDB;
@@ -65,16 +67,16 @@ public class MainActivity extends AppCompatActivity {
         // set the RECYCLER VIEW
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this)); // choose linearlayout and not gridlayout
+        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // choose linearlayout and not gridlayout
 
         // for the Adapter
         mDB = mSQL.getReadableDatabase();
         mCursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
-        mAdapter = new MyAdapter(this, mCursor);
+        mAdapter = new MyAdapter(this, mCursor, this);
         mRecyclerView.setAdapter(mAdapter);
 
         // for the SWIPE
-        simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN, 0);
 
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
@@ -173,8 +175,8 @@ public class MainActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
 
-    public void newLog(ContentValues cv){
-        mDB = mSQL.getWritableDatabase();
-        mDB.insertWithOnConflict(LOG_TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+    @Override
+    public void beginDrag(MyViewHolder viewHolder) {
+        itemTouchHelper.startDrag(viewHolder);
     }
 }
