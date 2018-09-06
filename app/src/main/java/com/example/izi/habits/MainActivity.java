@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity {
         mDB = mSQL.getReadableDatabase();
         mCursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
         mAdapter = new MyAdapter(this, mCursor);
-        mAdapter.setHasStableIds(true);
         mRecyclerView.setAdapter(mAdapter);
 
         // for the SWIPE

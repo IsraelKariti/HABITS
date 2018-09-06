@@ -33,13 +33,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
         mCursor = cursor;
     }
 
-    @Override
-    public long getItemId(int position) {
-        super.getItemId(position);
-        mCursor.moveToPosition(position);
-        return mCursor.getInt(0);
-    }
-
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

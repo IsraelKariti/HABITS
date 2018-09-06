@@ -46,6 +46,17 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+        int from = viewHolder.getLayoutPosition();
+        int to = target.getLayoutPosition();
+        int dbPositionFrom = from +1;
+        int dbPositionTo = to+1;
+        String strFrom = String.valueOf(dbPositionFrom);
+        String strTo = String.valueOf(dbPositionTo);
+
+        mainActivity.mDB = mainActivity.mSQL.getWritableDatabase();
+        mainActivity.mDB.execSQL("update habits set _id = (case when _id = "+strFrom+" then -"+strTo+" else -"+strFrom+" end) where _id in ( "+strFrom+" , "+strTo+" )");
+        mainActivity.mDB.execSQL("update habits set _id = - _id where _id < 0");
+        mainActivity.mAdapter.notifyItemMoved(from, to);
         return true;
     }
 
@@ -108,7 +119,6 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        // get the habit _ID in the database ; viewHolder internally calls MyAdapter.getItemId(position) ;
         int id = (int) viewHolder.getItemId();
 
         // DELETE
@@ -123,10 +133,13 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
             // delete habit
             mDB = mSQL.getWritableDatabase();
-            mDB.delete(TABLE_NAME, _ID+"=?", new String[]{String.valueOf(id)});
+            mDB.delete(TABLE_NAME, _ID+"=?", new String[]{String.valueOf(mDeletedHabitDbId)});
+
+            // update id after deletion
+            mDB.execSQL("update habits set _id = _id - 1 where _id > "+String.valueOf(mDeletedHabitDbId));
 
             mainActivity.updateHabitsCursor();
-            mainActivity.mAdapter.notifyItemRemoved(((MyViewHolder) viewHolder).position);
+            mainActivity.mAdapter.notifyDataSetChanged();
 
             // Snackbar to UNDO the delete
             Snackbar snackbar = Snackbar.make(mainActivity.mCoordinatorLayout, R.string.snackbarMessage , Snackbar.LENGTH_LONG);

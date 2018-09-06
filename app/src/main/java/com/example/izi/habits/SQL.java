@@ -19,7 +19,7 @@ public class SQL extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
 
         sqLiteDatabase.execSQL(CREATE_TABLE);
-        //sqLiteDatabase.execSQL(LOG_CREATE_TABLE);
+        sqLiteDatabase.execSQL(LOG_CREATE_TABLE);
     }
 
     @Override
