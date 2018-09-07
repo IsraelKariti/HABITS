@@ -6,23 +6,12 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.drawable.VectorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -31,15 +20,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.izi.habits.Interface.DragInterface;
-
-import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
-import static com.example.izi.habits.MyContract.MainTable._ID;
-// TODO change swipe to delete to alertdialog to confirm delete
-//TODO when delete also delete from LOG TABLE
-public class MainActivity extends AppCompatActivity implements DragInterface{
+
+public class MainActivity extends AppCompatActivity {
     public CoordinatorLayout mCoordinatorLayout;
     SQL mSQL;
     SQLiteDatabase mDB;
@@ -72,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements DragInterface{
         // for the Adapter
         mDB = mSQL.getReadableDatabase();
         mCursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
-        mAdapter = new MyAdapter(this, mCursor, this);
+        mAdapter = new MyAdapter(this, mCursor);
         mRecyclerView.setAdapter(mAdapter);
 
         // for the SWIPE
@@ -175,8 +159,4 @@ public class MainActivity extends AppCompatActivity implements DragInterface{
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
 
-    @Override
-    public void beginDrag(MyViewHolder viewHolder) {
-        itemTouchHelper.startDrag(viewHolder);
-    }
 }
