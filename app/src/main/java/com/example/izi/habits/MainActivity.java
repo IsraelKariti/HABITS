@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void add_habit(View view){
-        closeSoftKeyboard();
+
 
         String habit = mEditText.getText().toString().trim();
         // check if user is trying to add an empty habit
@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(MainActivity.this, "Habit already exist", Toast.LENGTH_SHORT).show();
             return;
         }
+        closeSoftKeyboard();
         mDB = mSQL.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_HABIT_NAME, habit);
