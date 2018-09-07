@@ -2,6 +2,7 @@ package com.example.izi.habits;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
@@ -43,5 +44,23 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
 
+    }
+
+    @Override
+    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+        super.onSelectedChanged(viewHolder, actionState);
+        if(viewHolder != null){
+            MyViewHolder myViewHolder = (MyViewHolder) viewHolder;
+            myViewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+        }
+    }
+
+    @Override
+    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+        if(viewHolder != null){
+            MyViewHolder myViewHolder = (MyViewHolder) viewHolder;
+            myViewHolder.itemView.setBackgroundColor(0);
+        }
     }
 }
