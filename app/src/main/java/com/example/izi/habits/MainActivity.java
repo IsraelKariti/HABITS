@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -25,8 +24,6 @@ import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 
 public class MainActivity extends AppCompatActivity {
-    CoordinatorLayout mCoordinatorLayout;
-    ConstraintLayout mConstraintLayout;
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -43,8 +40,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mCoordinatorLayout = findViewById(R.id.coordinator);
-        mConstraintLayout = findViewById(R.id.layout);
+
         mSQL = new SQL(this, null, null, 1);
 
         mEditText = getEditText();
@@ -97,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void add_habit(View view){
+        closeSoftKeyboard();
 
         String habit = mEditText.getText().toString().trim();
         // check if user is trying to add an empty habit
@@ -118,7 +115,7 @@ public class MainActivity extends AppCompatActivity {
         mEditText.setText("");
         updateHabitsCursor();
         Toast.makeText(MainActivity.this, "Habit was added", Toast.LENGTH_SHORT).show();
-        closeSoftKeyboard();
+        mRecyclerView.requestFocus();
     }
 
     public void buildAlertDialog(final String habit){
