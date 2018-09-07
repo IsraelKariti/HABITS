@@ -7,10 +7,10 @@ import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
@@ -25,7 +25,8 @@ import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 
 public class MainActivity extends AppCompatActivity {
-    public CoordinatorLayout mCoordinatorLayout;
+    CoordinatorLayout mCoordinatorLayout;
+    ConstraintLayout mConstraintLayout;
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -43,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mCoordinatorLayout = findViewById(R.id.coordinator);
-
+        mConstraintLayout = findViewById(R.id.layout);
         mSQL = new SQL(this, null, null, 1);
 
         mEditText = getEditText();
@@ -86,12 +87,10 @@ public class MainActivity extends AppCompatActivity {
 
     private Button getPlusButton() {
         Button btn = findViewById(R.id.button);
-        btn.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        btn.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onFocusChange(View view, boolean b) {
-                if(b){
-                    add_habit(view);
-                }
+            public void onClick(View view) {
+                add_habit(view);
             }
         });
         return btn;
@@ -119,6 +118,7 @@ public class MainActivity extends AppCompatActivity {
         mEditText.setText("");
         updateHabitsCursor();
         Toast.makeText(MainActivity.this, "Habit was added", Toast.LENGTH_SHORT).show();
+        closeSoftKeyboard();
     }
 
     public void buildAlertDialog(final String habit){
