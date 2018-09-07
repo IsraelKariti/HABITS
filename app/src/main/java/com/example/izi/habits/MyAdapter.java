@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.izi.habits.Interface.DragInterface;
@@ -49,10 +50,10 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
         mCursor.moveToPosition(position);
-        ((Button)holder.habit).setText(mCursor.getString(1));
-        (holder.itemView).setOnTouchListener(new View.OnTouchListener() {
+        ((TextView)holder.habit).setText(mCursor.getString(1));
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
+            public boolean onLongClick(View view) {
                 mDragInterface.beginDrag(holder);
                 return false;
             }

@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements DragInterface{
         // set the RECYCLER VIEW
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2)); // choose linearlayout and not gridlayout
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this)); // choose linearlayout and not gridlayout
 
         // for the Adapter
         mDB = mSQL.getReadableDatabase();

@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -24,13 +25,13 @@ import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_YEAR;
 public class MyViewHolder extends RecyclerView.ViewHolder {
 
     public Context mContext;
-    public Button habit;
-    public ImageView habdle;
+    public TextView habit;
+    public ImageView handle;
 
     public MyViewHolder(Context context, ConstraintLayout layout) {
         super(layout);
         mContext = context;
-        habit = (Button) layout.findViewById(R.id.habit);
-        habdle = (ImageView) layout.findViewById(R.id.handle);
+        habit = (TextView) layout.findViewById(R.id.habit);
+        handle = (ImageView) layout.findViewById(R.id.handle);
     }
 }
