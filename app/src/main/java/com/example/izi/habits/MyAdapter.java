@@ -50,7 +50,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     public void onBindViewHolder(@NonNull final MyViewHolder holder, int position) {
         mCursor.moveToPosition(position);
         ((Button)holder.habit).setText(mCursor.getString(1));
-        ((ImageView)holder.habdle).setOnTouchListener(new View.OnTouchListener() {
+        (holder.itemView).setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View view, MotionEvent motionEvent) {
                 mDragInterface.beginDrag(holder);
