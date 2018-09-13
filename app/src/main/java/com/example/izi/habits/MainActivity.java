@@ -13,6 +13,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
 
         // for the SWIPE
-        simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN , ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN , ItemTouchHelper.LEFT );
 
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
@@ -159,4 +160,12 @@ public class MainActivity extends AppCompatActivity {
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
 
+    public void deleteEntry(View view){
+        Toast.makeText(this, "DELETE", Toast.LENGTH_SHORT).show();
+        Log.i("IZII", "AAAAA");
+    }
+
+    public void editEntry(View view){
+        Toast.makeText(this, "EDITTTTT", Toast.LENGTH_SHORT).show();
+    }
 }
