@@ -2,16 +2,18 @@ package com.example.izi.habits;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,7 +22,7 @@ import android.widget.Toast;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface {
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -131,6 +133,21 @@ public class MainActivity extends AppCompatActivity {
     public void startAlertDialog(String str){
         myDialogFragment = MyDialogFragment.getInstance(str);
         myDialogFragment.show(fragmentManager, "abcd");
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 
+    @Override
+    public void updateEditedHabit(String from, String to) {
+
+        if(from.equals(to)){
+            mAdapter.notifyDataSetChanged();
+            return;
+        }
+        mDB = mSQL.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_HABIT_NAME, to);
+        mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{from});
+        updateHabitsCursor();
+        mAdapter.notifyDataSetChanged();
+    }
 }
