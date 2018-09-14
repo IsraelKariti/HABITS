@@ -10,16 +10,20 @@ import android.util.Log;
 import android.widget.EditText;
 
 public class MyDialogFragment extends DialogFragment {
-    String mHabit;
-    public MyDialogFragment(){
+
+    public static MyDialogFragment getInstance(String habit){
+        MyDialogFragment myDialogFragment = new MyDialogFragment();
+        Bundle args = new Bundle();
+        args.putString("habit", habit);
+        myDialogFragment.setArguments(args);
+        return myDialogFragment;
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        Log.i("XXXXXXXX","ENTER ONCREATEDIALOG");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("MyTitle");
+        builder.setTitle("EDIT HABIT");
         builder.setPositiveButton("DONE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -27,9 +31,10 @@ public class MyDialogFragment extends DialogFragment {
                 Log.i("ZZZZZZZ","one");
             }
         });
-
+        EditText editText = new EditText(getActivity());
+        editText.setText(getArguments().getString("habit"));
         // use builder.setView() to set a custom layout with edittext
-
+        builder.setView(editText);
         return builder.create();
     }
 }

@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startAlertDialog(String str){
-        myDialogFragment = new MyDialogFragment();
+        myDialogFragment = MyDialogFragment.getInstance(str);
         myDialogFragment.show(fragmentManager, "abcd");
     }
 
