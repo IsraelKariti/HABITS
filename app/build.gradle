@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
     defaultConfig {
         applicationId "com.example.izi.habits"
-        //vectorDrawables.useSupportLibrary = true
+        vectorDrawables.useSupportLibrary = true
         minSdkVersion 21
         targetSdkVersion 27
         versionCode 1
