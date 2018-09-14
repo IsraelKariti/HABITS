@@ -3,9 +3,11 @@ package com.example.izi.habits;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
+import android.widget.TextView;
 
 public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
@@ -44,7 +46,9 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        ((MainActivity)mContext).ad();
+        TextView tv = ((ConstraintLayout)viewHolder.itemView).findViewById(R.id.habit);
+        String str =  tv.getText().toString();
+        ((MainActivity)mContext).startAlertDialog(str);
     }
 
     @Override

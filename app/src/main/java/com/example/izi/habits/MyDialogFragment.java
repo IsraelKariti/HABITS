@@ -7,15 +7,20 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
+import android.widget.EditText;
 
 public class MyDialogFragment extends DialogFragment {
+    String mHabit;
+    public MyDialogFragment(){
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Log.i("XXXXXXXX","ENTER ONCREATEDIALOG");
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("MyTitle");
-        builder.setPositiveButton("earth", new DialogInterface.OnClickListener() {
+        builder.setPositiveButton("DONE", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 //dismiss();
@@ -24,6 +29,7 @@ public class MyDialogFragment extends DialogFragment {
         });
 
         // use builder.setView() to set a custom layout with edittext
+
         return builder.create();
     }
 }

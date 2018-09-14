@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -19,7 +20,7 @@ import android.widget.Toast;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 
-public class MainActivity extends FragmentActivity {
+public class MainActivity extends AppCompatActivity {
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -59,7 +60,7 @@ public class MainActivity extends FragmentActivity {
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
-        myDialogFragment = new MyDialogFragment();
+
         fragmentManager = getSupportFragmentManager();
     }
 
@@ -127,7 +128,8 @@ public class MainActivity extends FragmentActivity {
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
 
-    public void ad(){
+    public void startAlertDialog(String str){
+        myDialogFragment = new MyDialogFragment();
         myDialogFragment.show(fragmentManager, "abcd");
     }
 
