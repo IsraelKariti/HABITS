@@ -1,21 +1,16 @@
 package com.example.izi.habits;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ContentValues;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,7 +19,7 @@ import android.widget.Toast;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends FragmentActivity {
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -34,8 +29,8 @@ public class MainActivity extends AppCompatActivity {
     public MyAdapter mAdapter;
     ItemTouchHelper.SimpleCallback simpleCallback;
     ItemTouchHelper itemTouchHelper;
-    AlertDialog.Builder mAlertDialogBuilder;
-    AlertDialog mAlertDialog;
+    MyDialogFragment myDialogFragment;
+    FragmentManager fragmentManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +59,8 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
-        // init Alert Dialog
-        mAlertDialogBuilder = new AlertDialog.Builder(this);
-        mAlertDialogBuilder.setTitle("Edit Habit");
+        myDialogFragment = new MyDialogFragment();
+        fragmentManager = getSupportFragmentManager();
     }
 
     private EditText getEditText() {
@@ -120,33 +114,7 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.requestFocus();
     }
 
-    public void buildAlertDialog(final String habit){
-        final EditText editText = (EditText) LayoutInflater.from(this).inflate(R.layout.alert_dialog, null);
-        editText.setText(habit);
-        editText.setSelection(editText.getText().length());
-        mAlertDialogBuilder.setView(editText);
-        mAlertDialogBuilder.setPositiveButton("SAVE", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                mDB = mSQL.getWritableDatabase();
-                ContentValues cv = new ContentValues();
-                // if user left edittext empty restore original habit
-                if (editText.getText().toString().isEmpty()) {
-                    // doSomething
-                    editText.setText(habit);
-                }
-                cv.put(COLUMN_HABIT_NAME, editText.getText().toString());
-                mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{habit});
-                updateHabitsCursor();
-                //mAdapter.notifyDataSetChanged(); // i can't understand why this line doesnt cause recycler view to redraw
-                mRecyclerView.setAdapter(mAdapter);// use this line instead
-                dialogInterface.dismiss();
-            }
-        });
-        mAlertDialog = mAlertDialogBuilder.create();
-        mAlertDialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-        mAlertDialog.show();
-    }
+
 
     public void updateHabitsCursor(){
         mCursor.close();
@@ -157,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
     private void closeSoftKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
+    }
+
+    public void ad(){
+        myDialogFragment.show(fragmentManager, "abcd");
     }
 
 }

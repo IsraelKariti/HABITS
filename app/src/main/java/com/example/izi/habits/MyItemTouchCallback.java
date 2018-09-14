@@ -5,7 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.widget.Toast;
+import android.util.Log;
 
 public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
@@ -44,7 +44,7 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        Toast.makeText(mContext, "SWIPEDDDDD", Toast.LENGTH_SHORT).show();
+        ((MainActivity)mContext).ad();
     }
 
     @Override
