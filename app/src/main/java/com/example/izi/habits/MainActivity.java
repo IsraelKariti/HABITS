@@ -22,7 +22,7 @@ import android.widget.Toast;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 
-public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface {
+public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface, MyDialogFragment.DeleteHabitInterface {
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -147,6 +147,14 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_HABIT_NAME, to);
         mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{from});
+        updateHabitsCursor();
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void deleteHabit(String habit) {
+        mDB = mSQL.getWritableDatabase();
+        mDB.delete(TABLE_NAME, COLUMN_HABIT_NAME+"=?", new String[]{habit});
         updateHabitsCursor();
         mAdapter.notifyDataSetChanged();
     }

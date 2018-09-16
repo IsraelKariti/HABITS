@@ -15,8 +15,14 @@ import android.widget.EditText;
 public class MyDialogFragment extends DialogFragment {
 
     UpdateEditedHabitInterface mUpdateEditedHabitInterface;
+    DeleteHabitInterface mDeleteHabitInterface;
+
     public interface UpdateEditedHabitInterface{
         void updateEditedHabit(String from, String to);
+    }
+
+    public interface DeleteHabitInterface{
+        void deleteHabit(String habit);
     }
 
     @Override
@@ -53,7 +59,12 @@ public class MyDialogFragment extends DialogFragment {
                 mUpdateEditedHabitInterface.updateEditedHabit(origionallySwipedHabit, editedHabit);
             }
         });
-
+        builder.setNegativeButton("DELETE", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                mDeleteHabitInterface.deleteHabit(origionallySwipedHabit);
+            }
+        });
         return builder.create();
     }
 
@@ -63,6 +74,7 @@ public class MyDialogFragment extends DialogFragment {
         try{
             // i can get a class cast exception
             mUpdateEditedHabitInterface = (UpdateEditedHabitInterface)getActivity();
+            mDeleteHabitInterface = (DeleteHabitInterface)getActivity();
         }
         catch (ClassCastException e){
             Log.e("XXXXX", e.getMessage() );
