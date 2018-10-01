@@ -2,7 +2,6 @@ package com.example.izi.habits;
 
 import android.app.Activity;
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -11,16 +10,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
+import static com.example.izi.habits.MyContract.MainTable._ID;
 
 public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface, MyDialogFragment.DeleteHabitInterface {
     SQL mSQL;
@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         mSQL = new SQL(this, null, null, 1);
@@ -57,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mRecyclerView.setAdapter(mAdapter);
 
         // for the SWIPE
-        simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN , ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
+        simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN , 0);
 
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     }
 
     private Button getPlusButton() {
-        Button btn = findViewById(R.id.button);
+        Button btn = findViewById(R.id.btnNotify);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -91,8 +92,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     }
 
     public void add_habit(View view){
-
-
         String habit = mEditText.getText().toString().trim();
         // check if user is trying to add an empty habit
         if(habit.matches("")){
@@ -116,8 +115,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         Toast.makeText(MainActivity.this, "Habit was added", Toast.LENGTH_SHORT).show();
         mRecyclerView.requestFocus();
     }
-
-
 
     public void updateHabitsCursor(){
         mCursor.close();
@@ -157,5 +154,40 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mDB.delete(TABLE_NAME, COLUMN_HABIT_NAME+"=?", new String[]{habit});
         updateHabitsCursor();
         mAdapter.notifyDataSetChanged();
+    }
+
+    public int getUpdatedPosition(String habit){
+        mDB = mSQL.getReadableDatabase();
+        Cursor cursor = mDB.query(TABLE_NAME, new String[]{_ID}, COLUMN_HABIT_NAME+"=?", new String[]{habit}, null, null, null);
+        cursor.moveToFirst();
+        return cursor.getInt(0)-1;
+    }
+
+    public void updateCursor(){
+        Cursor updatedCursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
+        mAdapter.setCursor(updatedCursor);
+    }
+
+    public void delete(View view){
+        MyConstraintLayout myConstraintLayout = (MyConstraintLayout) view.getParent();
+        TextView textView = myConstraintLayout.findViewById(R.id.habit);
+        String string = textView.getText().toString();
+        Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
+        mDB = mSQL.getReadableDatabase();
+        Cursor cursor = mDB.query(TABLE_NAME, new String[]{"*"}, COLUMN_HABIT_NAME+"=?", new String[]{string}, null, null, null);
+        cursor.moveToFirst();
+        int index = cursor.getInt(0);
+        String indexString = String.valueOf(index);
+        mDB = mSQL.getWritableDatabase();
+        mDB.delete(TABLE_NAME, COLUMN_HABIT_NAME+"=?", new String[]{string});
+
+        //decrease ID by 1 for all items with ID higher than the deleted ID
+        mDB.execSQL("update habits set _id = _id - 1 where _id > "+indexString);
+
+        mDB = mSQL.getReadableDatabase();
+        cursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
+        mAdapter.setCursor(cursor);
+        mAdapter.notifyItemRemoved(index-1);
+
     }
 }

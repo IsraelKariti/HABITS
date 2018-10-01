@@ -15,7 +15,7 @@
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/button"
+            android:id="@+id/btnNotify"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:background="@android:drawable/ic_input_add"
@@ -29,7 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="60dp"
             android:hint="enter a habit"
-            app:layout_constraintEnd_toStartOf="@+id/button"
+            app:layout_constraintEnd_toStartOf="@+id/btnNotify"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -50,7 +50,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="editText,button"
+            app:constraint_referenced_ids="editText,btnNotify"
             app:layout_constraintTop_toTopOf="parent" />
     </android.support.constraint.ConstraintLayout>
 

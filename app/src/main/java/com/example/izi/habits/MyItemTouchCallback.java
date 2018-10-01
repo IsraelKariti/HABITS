@@ -35,6 +35,15 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
         mainActivity.mDB.execSQL("update habits set _id = (case when _id = "+strFrom+" then -"+strTo+" else -"+strFrom+" end) where _id in ( "+strFrom+" , "+strTo+" )");
         mainActivity.mDB.execSQL("update habits set _id = - _id where _id < 0");
         mainActivity.mAdapter.notifyItemMoved(from, to);
+
+        //check if one of the replaced rows is the expanded row
+        MyAdapter myAdapter = ((MainActivity)mContext).mAdapter;
+        int expandedIndex = myAdapter.getExpandedIndex();
+        if(expandedIndex==from)
+            myAdapter.updateExpandedIndex(to);
+        if(expandedIndex==to)
+            myAdapter.updateExpandedIndex(from);
+
         return true;
     }
 
@@ -46,9 +55,9 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
 
     @Override
     public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        TextView tv = ((ConstraintLayout)viewHolder.itemView).findViewById(R.id.habit);
-        String str =  tv.getText().toString();
-        ((MainActivity)mContext).startAlertDialog(str);
+//        TextView tv = ((ConstraintLayout)viewHolder.itemView).findViewById(R.id.habit);
+//        String str =  tv.getText().toString();
+//        ((MainActivity)mContext).startAlertDialog(str);
     }
 
     @Override
@@ -67,5 +76,6 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
             MyViewHolder myViewHolder = (MyViewHolder) viewHolder;
             myViewHolder.itemView.setBackgroundColor(0);
         }
+        ((MainActivity)mContext).updateCursor();
     }
 }
