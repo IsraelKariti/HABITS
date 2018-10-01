@@ -15,14 +15,9 @@ import android.widget.EditText;
 public class MyDialogFragment extends DialogFragment {
 
     UpdateEditedHabitInterface mUpdateEditedHabitInterface;
-    DeleteHabitInterface mDeleteHabitInterface;
 
     public interface UpdateEditedHabitInterface{
         void updateEditedHabit(String from, String to);
-    }
-
-    public interface DeleteHabitInterface{
-        void deleteHabit(String habit);
     }
 
     @Override
@@ -46,8 +41,8 @@ public class MyDialogFragment extends DialogFragment {
         builder.setTitle("EDIT HABIT");
 
         final EditText editText = new EditText(getActivity());
-        final String origionallySwipedHabit = getArguments().getString("habit");
-        editText.setText(origionallySwipedHabit);
+        final String origionalHabit = getArguments().getString("habit");
+        editText.setText(origionalHabit);
         editText.setSelection(editText.getText().length());
         editText.requestFocus();
         builder.setView(editText);
@@ -56,15 +51,10 @@ public class MyDialogFragment extends DialogFragment {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
                 String editedHabit = editText.getText().toString();
-                mUpdateEditedHabitInterface.updateEditedHabit(origionallySwipedHabit, editedHabit);
+                mUpdateEditedHabitInterface.updateEditedHabit(origionalHabit, editedHabit);
             }
         });
-        builder.setNegativeButton("DELETE", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                mDeleteHabitInterface.deleteHabit(origionallySwipedHabit);
-            }
-        });
+
         return builder.create();
     }
 
@@ -74,7 +64,6 @@ public class MyDialogFragment extends DialogFragment {
         try{
             // i can get a class cast exception
             mUpdateEditedHabitInterface = (UpdateEditedHabitInterface)getActivity();
-            mDeleteHabitInterface = (DeleteHabitInterface)getActivity();
         }
         catch (ClassCastException e){
             Log.e("XXXXX", e.getMessage() );

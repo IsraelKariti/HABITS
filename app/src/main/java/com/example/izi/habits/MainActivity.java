@@ -22,7 +22,7 @@ import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
 
-public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface, MyDialogFragment.DeleteHabitInterface {
+public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface {
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -127,12 +127,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
 
-    public void startAlertDialog(String str){
-        myDialogFragment = MyDialogFragment.getInstance(str);
-        myDialogFragment.show(fragmentManager, "abcd");
-        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
-    }
-
     @Override
     public void updateEditedHabit(String from, String to) {
 
@@ -148,13 +142,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mAdapter.notifyDataSetChanged();
     }
 
-    @Override
-    public void deleteHabit(String habit) {
-        mDB = mSQL.getWritableDatabase();
-        mDB.delete(TABLE_NAME, COLUMN_HABIT_NAME+"=?", new String[]{habit});
-        updateHabitsCursor();
-        mAdapter.notifyDataSetChanged();
-    }
+
 
     public int getUpdatedPosition(String habit){
         mDB = mSQL.getReadableDatabase();
@@ -189,5 +177,14 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mAdapter.setCursor(cursor);
         mAdapter.notifyItemRemoved(index-1);
 
+    }
+
+    public void edit(View view){
+        MyConstraintLayout myConstraintLayout = (MyConstraintLayout) view.getParent();
+        TextView tv = myConstraintLayout.findViewById(R.id.habit);
+        String str =  tv.getText().toString();
+        myDialogFragment = MyDialogFragment.getInstance(str);
+        myDialogFragment.show(fragmentManager, "abcd");
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
     }
 }
