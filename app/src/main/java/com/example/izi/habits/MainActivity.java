@@ -2,14 +2,17 @@ package com.example.izi.habits;
 
 import android.app.Activity;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -18,6 +21,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Calendar;
+
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_DAY;
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_DURATION;
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_HABIT;
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_MONTH;
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_NOTE_COUNT;
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_STARTING_TIME;
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_TOTAL_DAY;
+import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_YEAR;
+import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
@@ -38,7 +52,8 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+//        Intent intent = new Intent(this, LogActivity.class);
+//        startActivity(intent);
         setContentView(R.layout.activity_main);
 
         mSQL = new SQL(this, null, null, 1);
@@ -186,5 +201,63 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         myDialogFragment = MyDialogFragment.getInstance(str);
         myDialogFragment.show(fragmentManager, "abcd");
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+    }
+
+    public void note(View view){
+        // get the pressed habit
+        MyConstraintLayout myConstraintLayout = (MyConstraintLayout) view.getParent();
+        TextView tv = myConstraintLayout.findViewById(R.id.habit);
+        String habitString = tv.getText().toString();
+
+        // get the current total day
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int dayInMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        int dayInYear = calendar.get(Calendar.DAY_OF_YEAR);
+        int totalDay = year*365 + dayInYear;
+        String totalDayString = String.valueOf(totalDay);
+
+        // get the minute
+        int minute = calendar.get(Calendar.MINUTE);
+        int hour = calendar.get(Calendar.HOUR);
+        int totalMinute = hour*60+minute;
+
+        // check if this button was clicked today already
+        mDB = mSQL.getReadableDatabase();
+        Cursor cursor = mDB.query(LOG_TABLE_NAME, new String[]{"*"}, LOG_COLUMN_HABIT+"=? AND "+LOG_COLUMN_TOTAL_DAY+"=?", new String[]{habitString, totalDayString}, null, null, null);
+        if(cursor.getCount() == 0){
+            Log.i("XXXXX", "FIRST ENTRY");
+            // this is the first entry for this day
+            mDB = mSQL.getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(LOG_COLUMN_HABIT, habitString);
+            cv.put(LOG_COLUMN_TOTAL_DAY, totalDay);
+            cv.put(LOG_COLUMN_YEAR, year);
+            cv.put(LOG_COLUMN_MONTH, month);
+            cv.put(LOG_COLUMN_DAY, dayInMonth);
+            cv.put(LOG_COLUMN_NOTE_COUNT, 1);
+            cv.put(LOG_COLUMN_STARTING_TIME, totalMinute);
+            cv.put(LOG_COLUMN_DURATION, 0);
+            mDB.insert(LOG_TABLE_NAME, null, cv);
+
+        }
+        else{
+            Log.i("XXXXXX", "JUST ANOTHER ENTRY");
+            cursor.moveToFirst();
+            int noteCount = cursor.getInt(6);
+            Log.i("XXXXXX", "notecount is: "+String.valueOf(noteCount));
+
+            int updateNoteCount = ++noteCount;
+            Log.i("XXXXXX", "updatedNotecount is: "+String.valueOf(updateNoteCount));
+
+            int startTime = cursor.getInt(7);
+            int updatedDuration = totalMinute - startTime;
+            mDB = mSQL.getWritableDatabase();
+            ContentValues cv = new ContentValues();
+            cv.put(LOG_COLUMN_NOTE_COUNT, updateNoteCount);
+            cv.put(LOG_COLUMN_DURATION, updatedDuration);
+            mDB.updateWithOnConflict(LOG_TABLE_NAME, cv,LOG_COLUMN_HABIT+"=? AND "+LOG_COLUMN_TOTAL_DAY+"=?", new String[]{habitString, totalDayString}, SQLiteDatabase.CONFLICT_REPLACE );
+        }
     }
 }

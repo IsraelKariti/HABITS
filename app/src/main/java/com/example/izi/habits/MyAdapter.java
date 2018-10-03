@@ -51,7 +51,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
             public void onClick(View view) {
                 String habit = ((TextView)((MyConstraintLayout)view).findViewById(R.id.habit)).getText().toString();
                 int updatedPosition = ((MainActivity)mContext).getUpdatedPosition(habit);
-                Toast.makeText(mContext, String.valueOf(updatedPosition), Toast.LENGTH_SHORT).show();
                 int preExpanded = expandedIndex;
                 expandedIndex = isEpanded?-1:updatedPosition;
 
