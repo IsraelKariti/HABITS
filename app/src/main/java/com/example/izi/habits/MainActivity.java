@@ -35,8 +35,7 @@ import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
-
-public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface {
+public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface, MyDialogFragment_Delete.DeleteHabitInterface {
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
@@ -149,15 +148,22 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             mAdapter.notifyDataSetChanged();
             return;
         }
+
         mDB = mSQL.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_HABIT_NAME, to);
+
+        // update edited habit in HABITS table
         mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{from});
         updateHabitsCursor();
         mAdapter.notifyDataSetChanged();
+
+
+        // update edited habit also in LOG table
+        ContentValues cv_log = new ContentValues();
+        cv_log.put(LOG_COLUMN_HABIT, to);
+        mDB.update(LOG_TABLE_NAME, cv_log, LOG_COLUMN_HABIT+"=?", new String[]{from});
     }
-
-
 
     public int getUpdatedPosition(String habit){
         mDB = mSQL.getReadableDatabase();
@@ -172,21 +178,35 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     }
 
     public void delete(View view){
+        // get the habit as a string
         MyConstraintLayout myConstraintLayout = (MyConstraintLayout) view.getParent();
         TextView textView = myConstraintLayout.findViewById(R.id.habit);
         String string = textView.getText().toString();
+
+        // create dialog for delete
+        MyDialogFragment_Delete myDialogFragment_delete = MyDialogFragment_Delete.getInstance(string);
+        myDialogFragment_delete.show(fragmentManager, "deleteTag");
+
+    }
+
+    public void deleteHabit(String string) {
         Toast.makeText(this, string, Toast.LENGTH_SHORT).show();
         mDB = mSQL.getReadableDatabase();
+
+        // keep index of deleted habit
         Cursor cursor = mDB.query(TABLE_NAME, new String[]{"*"}, COLUMN_HABIT_NAME+"=?", new String[]{string}, null, null, null);
         cursor.moveToFirst();
         int index = cursor.getInt(0);
         String indexString = String.valueOf(index);
+
+        // delete habit from HABITS table
         mDB = mSQL.getWritableDatabase();
         mDB.delete(TABLE_NAME, COLUMN_HABIT_NAME+"=?", new String[]{string});
 
         //decrease ID by 1 for all items with ID higher than the deleted ID
         mDB.execSQL("update habits set _id = _id - 1 where _id > "+indexString);
 
+        // get updated cursor
         mDB = mSQL.getReadableDatabase();
         cursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
         mAdapter.setCursor(cursor);
@@ -196,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mDB = mSQL.getWritableDatabase();
         mDB.delete(LOG_TABLE_NAME, LOG_COLUMN_HABIT+"=?", new String[]{string});
     }
+
 
     public void edit(View view){
         MyConstraintLayout myConstraintLayout = (MyConstraintLayout) view.getParent();

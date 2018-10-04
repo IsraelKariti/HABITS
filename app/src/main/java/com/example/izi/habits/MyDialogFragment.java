@@ -75,7 +75,7 @@ public class MyDialogFragment extends DialogFragment {
         InputMethodManager imm =
                 (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm.isActive())
-            imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
+            imm.toggleSoftInput(0, InputMethodManager.RESULT_HIDDEN);
         super.onDismiss(dialog);
     }
 }

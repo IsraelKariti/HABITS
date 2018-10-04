@@ -22,7 +22,7 @@ public class LogActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chart);
         lineChart = findViewById(R.id.chart);
-        lineChart.setScaleXEnabled(true);// todo check pinching on Huawei - emulator it doesnt work. must make sure x axis scale in and out
+        lineChart.setScaleXEnabled(true);
         lineChart.setScaleYEnabled(false);
         lineChart.getDescription().setEnabled(false);
         lineChart.getLegend().setEnabled(false);

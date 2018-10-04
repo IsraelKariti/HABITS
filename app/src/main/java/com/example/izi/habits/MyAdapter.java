@@ -30,8 +30,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         final MyConstraintLayout layout = (MyConstraintLayout) LayoutInflater.from(parent.getContext()).inflate(R.layout.main_row, parent, false);
-        //todo set on click listener to open the bigredbutton
-
         MyViewHolder myViewHolder = new MyViewHolder(mContext, layout);
         return myViewHolder;
     }
