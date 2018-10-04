@@ -78,4 +78,20 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     public int getExpandedIndex(){
         return expandedIndex;
     }
+
+    public void closeExpandedHabit(){
+        int temp = expandedIndex;
+        expandedIndex = -1;
+        if(temp != -1){
+            Log.i("XXXX", "CLOSE EXPANDED INDEX: "+String.valueOf(temp));
+            notifyItemChanged(temp);
+        }
+    }
+
+    public void closeExpandedHabit2(){
+        int temp = expandedIndex;
+        expandedIndex = -1;
+    }
+
+
 }

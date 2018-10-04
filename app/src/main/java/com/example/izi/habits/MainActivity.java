@@ -1,5 +1,4 @@
 package com.example.izi.habits;
-
 import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -9,11 +8,13 @@ import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
+import java.util.MissingResourceException;
 
 import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_DAY;
 import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_DURATION;
@@ -47,12 +49,14 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     ItemTouchHelper itemTouchHelper;
     MyDialogFragment myDialogFragment;
     FragmentManager fragmentManager;
+    boolean refocusEditText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        Intent intent = new Intent(this, LogActivity.class);
 //        startActivity(intent);
+
         setContentView(R.layout.activity_main);
 
         mSQL = new SQL(this, null, null, 1);
@@ -64,6 +68,19 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mRecyclerView = findViewById(R.id.recycler_view);
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this)); // choose linearlayout and not gridlayout
+        mRecyclerView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                // when recyclerview is loosing focus close expanded habit
+                if(!hasFocus) {
+                    MyViewHolder holder = (MyViewHolder) mRecyclerView.findViewHolderForAdapterPosition(mAdapter.expandedIndex);
+                    holder.buttonNotify.setVisibility(View.GONE);
+                    holder.buttonEdit.setVisibility(View.GONE);
+                    holder.buttonDelete.setVisibility(View.GONE);
+                    holder.buttonHistory.setVisibility(View.GONE);
+                }
+            }
+        });
 
         // for the Adapter
         mDB = mSQL.getReadableDatabase();
@@ -71,14 +88,15 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mAdapter = new MyAdapter(this, mCursor);
         mRecyclerView.setAdapter(mAdapter);
 
-        // for the SWIPE
+        // for the DRAG
         simpleCallback = new MyItemTouchCallback(this, ItemTouchHelper.UP | ItemTouchHelper.DOWN , 0);
 
         itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
-
         fragmentManager = getSupportFragmentManager();
+
+        refocusEditText = false;
     }
 
     private EditText getEditText() {
@@ -86,13 +104,15 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         editText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-            if(!b){
-                closeSoftKeyboard();
-            }
+                if(!b){
+                    closeSoftKeyboard();
+                }
             }
         });
         return editText;
     }
+
+
 
     private Button getPlusButton() {
         Button btn = findViewById(R.id.btnNotify);
@@ -141,6 +161,11 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
     }
 
+    public void openSoftKeyboard(){
+        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(mEditText, InputMethodManager.SHOW_FORCED);
+    }
+
     @Override
     public void updateEditedHabit(String from, String to) {
 
@@ -149,11 +174,13 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             return;
         }
 
+        // close expanded habit
+        mAdapter.closeExpandedHabit();
+
+        // update edited habit in HABITS table
         mDB = mSQL.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_HABIT_NAME, to);
-
-        // update edited habit in HABITS table
         mDB.update(TABLE_NAME, cv, COLUMN_HABIT_NAME+"=?", new String[]{from});
         updateHabitsCursor();
         mAdapter.notifyDataSetChanged();
@@ -163,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         ContentValues cv_log = new ContentValues();
         cv_log.put(LOG_COLUMN_HABIT, to);
         mDB.update(LOG_TABLE_NAME, cv_log, LOG_COLUMN_HABIT+"=?", new String[]{from});
+
     }
 
     public int getUpdatedPosition(String habit){
@@ -236,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         // get the current total day
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
+        int month = calendar.get(Calendar.MONTH) + 1; // change 0-based month 1-based month
         int dayInMonth = calendar.get(Calendar.DAY_OF_MONTH);
         int dayInYear = calendar.get(Calendar.DAY_OF_YEAR);
         int totalDay = year*365 + dayInYear;
