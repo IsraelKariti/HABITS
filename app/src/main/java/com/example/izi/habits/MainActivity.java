@@ -192,6 +192,9 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mAdapter.setCursor(cursor);
         mAdapter.notifyItemRemoved(index-1);
 
+        // delete from LOG table
+        mDB = mSQL.getWritableDatabase();
+        mDB.delete(LOG_TABLE_NAME, LOG_COLUMN_HABIT+"=?", new String[]{string});
     }
 
     public void edit(View view){
