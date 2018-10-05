@@ -8,6 +8,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -23,14 +26,17 @@ import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_HABIT;
 import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 
 public class LogActivity extends AppCompatActivity {
+    String mHabitString;
+
     LineChart lineChart;
     SQL mSQL;
     SQLiteDatabase mDB;
     Cursor mCursor;
 
-    String dayName;
-    String monthName;
-    String yearName;
+    LineData data_count;
+    LineData data_duration;
+
+    boolean dataIsCount;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,15 +67,15 @@ public class LogActivity extends AppCompatActivity {
 
         // get the habit that suppose to be shown
         Intent intent = getIntent();
-        String habitString = intent.getStringExtra("habit");
+        mHabitString = intent.getStringExtra("habit");
 
         // get cursor containint all logs
         mSQL = new SQL(this, null, null, 1);
         mDB = mSQL.getReadableDatabase();
-        mCursor = mDB.query(LOG_TABLE_NAME, new String[]{"*"}, LOG_COLUMN_HABIT+"=?", new String[]{habitString}, null, null, null);
+        mCursor = mDB.query(LOG_TABLE_NAME, new String[]{"*"}, LOG_COLUMN_HABIT+"=?", new String[]{mHabitString}, null, null, null);
 
         mCursor.moveToFirst();
-
+        Log.i("XXXXXXX", "SIZE IS : "+String.valueOf(mCursor.getCount()));
         // create the list
         List<Entry> entries_by_count = new ArrayList<Entry>();
         while(mCursor.isAfterLast() == false){
@@ -77,6 +83,7 @@ public class LogActivity extends AppCompatActivity {
             int y = mCursor.getInt(6);
             entries_by_count.add(new Entry(x,y));
             mCursor.moveToNext();
+            Log.i("XXXXX", "COUNT");
         }
 
         mCursor.moveToFirst();
@@ -84,8 +91,9 @@ public class LogActivity extends AppCompatActivity {
         while(mCursor.isAfterLast() == false){
             int x = mCursor.getInt(2);
             int y = mCursor.getInt(8);
-            entries_by_count.add(new Entry(x,y));
+            entries_by_duration.add(new Entry(x,y));
             mCursor.moveToNext();
+            Log.i("XXXXX", "X: "+String.valueOf(x)+" Y: "+String.valueOf(y));
         }
 
         // style the dataset
@@ -93,23 +101,51 @@ public class LogActivity extends AppCompatActivity {
         dataSet.setLineWidth(5);
         dataSet.setDrawValues(false);
         dataSet.setDrawHighlightIndicators(false);
-        LineData data = new LineData(dataSet);
+        data_count = new LineData(dataSet);
 
         // style dataset - durationset
         LineDataSet dataSet_duration = new LineDataSet(entries_by_duration, "Label");
         dataSet_duration.setLineWidth(5);
         dataSet_duration.setDrawValues(false);
         dataSet_duration.setDrawHighlightIndicators(false);
-        LineData data_duration = new LineData(dataSet_duration);
+        data_duration = new LineData(dataSet_duration);
 
-        lineChart.setData(data);
-
+        lineChart.setData(data_count);
+        dataIsCount = true;
         lineChart.invalidate();
 
         lineChart.setVisibleXRangeMaximum(5.0f);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-        setTitle(habitString);
+        setTitle(mHabitString + " count");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.log_menu, menu);
+
+        // return true so that the menu pop up is opened
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(dataIsCount){
+            lineChart.setData(data_duration);
+            lineChart.invalidate();
+            lineChart.setVisibleXRangeMaximum(5.0f);
+            dataIsCount = false;
+            setTitle(mHabitString + " duration");
+        }
+        else{
+            lineChart.setData(data_count);
+            lineChart.invalidate();
+            lineChart.setVisibleXRangeMaximum(5.0f);
+            dataIsCount = true;
+            setTitle(mHabitString + " count");
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

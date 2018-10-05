@@ -39,6 +39,7 @@ import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HAS_NOTES;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
+// todo add indication that not has been taken
 public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface, MyDialogFragment_Delete.DeleteHabitInterface {
     SQL mSQL;
     SQLiteDatabase mDB;
@@ -254,6 +255,15 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     }
 
     public void note(View view){
+        final Button btn = (Button) view;
+        Toast.makeText(this, "Note taken", Toast.LENGTH_SHORT).show();
+        btn.animate().scaleX(1.2f).scaleY(1.2f).setDuration(150).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                btn.animate().scaleX(1f).scaleY(1f).setDuration(150);
+            }
+        });
+
         // get the pressed habit
         MyConstraintLayout myConstraintLayout = (MyConstraintLayout) view.getParent();
         TextView tv = myConstraintLayout.findViewById(R.id.habit);
