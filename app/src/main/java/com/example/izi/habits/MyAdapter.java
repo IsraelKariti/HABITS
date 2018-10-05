@@ -40,6 +40,7 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
         mCursor.moveToPosition(position);
         boolean hasNotes = mCursor.getInt(2) == 0 ? false : true;
         ((TextView)holder.habit).setText(mCursor.getString(1));
+        holder.mMyConstraintLayout.setTranslationZ(isEpanded?10f:0f);
         holder.buttonNotify.setVisibility(isEpanded?View.VISIBLE:View.GONE);
         holder.buttonEdit.setVisibility(isEpanded?View.VISIBLE:View.GONE);
         holder.buttonDelete.setVisibility(isEpanded?View.VISIBLE:View.GONE);
