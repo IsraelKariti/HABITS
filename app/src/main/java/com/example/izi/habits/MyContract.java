@@ -9,12 +9,14 @@ public class MyContract {
         public static final String TABLE_NAME = "HABITS";
 
         public static final String _ID = BaseColumns._ID;
-        public static final String COLUMN_HABIT_NAME = "HABIT_NAME";
+        public static final String COLUMN_HABIT_NAME = " HABIT_NAME ";
+        public static final String COLUMN_HAS_NOTES = " HAS_NOTES ";
 
         public static final String COMMA = " , ";
         public static final String CREATE_TABLE = "CREATE TABLE "+ TABLE_NAME + " ( "+
                 _ID + " INTEGER PRIMARY KEY " + COMMA +
-                COLUMN_HABIT_NAME + " TEXT " +
+                COLUMN_HABIT_NAME + " TEXT " + COMMA +
+                COLUMN_HAS_NOTES + " INT " +
                 " ) ";
     }
 

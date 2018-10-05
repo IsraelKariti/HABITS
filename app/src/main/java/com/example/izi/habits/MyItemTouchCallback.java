@@ -76,6 +76,6 @@ public class MyItemTouchCallback extends ItemTouchHelper.SimpleCallback {
             MyViewHolder myViewHolder = (MyViewHolder) viewHolder;
             myViewHolder.itemView.setBackgroundColor(0);
         }
-        ((MainActivity)mContext).updateCursor();
+        ((MainActivity)mContext).updateHabitsCursor();
     }
 }

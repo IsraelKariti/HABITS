@@ -38,12 +38,23 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
     public void onBindViewHolder(@NonNull final MyViewHolder holder, final int position) {
         final boolean isEpanded = position == expandedIndex;
         mCursor.moveToPosition(position);
-
+        boolean hasNotes = mCursor.getInt(2) == 0 ? false : true;
         ((TextView)holder.habit).setText(mCursor.getString(1));
         holder.buttonNotify.setVisibility(isEpanded?View.VISIBLE:View.GONE);
         holder.buttonEdit.setVisibility(isEpanded?View.VISIBLE:View.GONE);
         holder.buttonDelete.setVisibility(isEpanded?View.VISIBLE:View.GONE);
         holder.buttonHistory.setVisibility(isEpanded?View.VISIBLE:View.GONE);
+
+        // enable or disable view history button
+        if(hasNotes) {
+            holder.buttonHistory.setBackgroundResource(R.drawable.ic_view_history_black_24dp);
+            holder.buttonHistory.setEnabled(true);
+        }
+        else{
+            holder.buttonHistory.setBackgroundResource(R.drawable.ic_view_history_grey_24dp);
+            holder.buttonHistory.setEnabled(false);
+        }
+
         holder.mMyConstraintLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -87,11 +98,4 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
             notifyItemChanged(temp);
         }
     }
-
-    public void closeExpandedHabit2(){
-        int temp = expandedIndex;
-        expandedIndex = -1;
-    }
-
-
 }

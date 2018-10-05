@@ -35,6 +35,7 @@ import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_TOTAL_DAY;
 import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_YEAR;
 import static com.example.izi.habits.MyContract.LogTable.LOG_TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable.COLUMN_HABIT_NAME;
+import static com.example.izi.habits.MyContract.MainTable.COLUMN_HAS_NOTES;
 import static com.example.izi.habits.MyContract.MainTable.TABLE_NAME;
 import static com.example.izi.habits.MyContract.MainTable._ID;
 public class MainActivity extends AppCompatActivity implements MyDialogFragment.UpdateEditedHabitInterface, MyDialogFragment_Delete.DeleteHabitInterface {
@@ -73,11 +74,13 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             public void onFocusChange(View v, boolean hasFocus) {
                 // when recyclerview is loosing focus close expanded habit
                 if(!hasFocus) {
-                    MyViewHolder holder = (MyViewHolder) mRecyclerView.findViewHolderForAdapterPosition(mAdapter.expandedIndex);
-                    holder.buttonNotify.setVisibility(View.GONE);
-                    holder.buttonEdit.setVisibility(View.GONE);
-                    holder.buttonDelete.setVisibility(View.GONE);
-                    holder.buttonHistory.setVisibility(View.GONE);
+                    if(mAdapter.expandedIndex != -1){
+                        MyViewHolder holder = (MyViewHolder) mRecyclerView.findViewHolderForAdapterPosition(mAdapter.expandedIndex);
+                        holder.buttonNotify.setVisibility(View.GONE);
+                        holder.buttonEdit.setVisibility(View.GONE);
+                        holder.buttonDelete.setVisibility(View.GONE);
+                        holder.buttonHistory.setVisibility(View.GONE);
+                    }
                 }
             }
         });
@@ -143,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mDB = mSQL.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_HABIT_NAME, habit);
+        cv.put(COLUMN_HAS_NOTES, 0);
         mDB.insertWithOnConflict(TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
         mEditText.setText("");
         updateHabitsCursor();
@@ -159,11 +163,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     private void closeSoftKeyboard() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(mEditText.getWindowToken(), 0);
-    }
-
-    public void openSoftKeyboard(){
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        imm.showSoftInput(mEditText, InputMethodManager.SHOW_FORCED);
     }
 
     @Override
@@ -198,11 +197,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         Cursor cursor = mDB.query(TABLE_NAME, new String[]{_ID}, COLUMN_HABIT_NAME+"=?", new String[]{habit}, null, null, null);
         cursor.moveToFirst();
         return cursor.getInt(0)-1;
-    }
-
-    public void updateCursor(){
-        Cursor updatedCursor = mDB.query(TABLE_NAME, new String[]{"*"}, null, null, null, null, null);
-        mAdapter.setCursor(updatedCursor);
     }
 
     public void delete(View view){
@@ -261,6 +255,21 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         TextView tv = myConstraintLayout.findViewById(R.id.habit);
         String habitString = tv.getText().toString();
 
+        // enable view_history button
+        Button viewHistory = myConstraintLayout.findViewById(R.id.btnHistory);
+        if(viewHistory.isEnabled() == false){
+            viewHistory.setEnabled(true);
+            viewHistory.setBackgroundResource(R.drawable.ic_view_history_black_24dp);
+
+            // update HABITS table that this habit was documented and has viewable history
+            mDB = mSQL.getWritableDatabase();
+            ContentValues cv_hasNotes = new ContentValues();
+            cv_hasNotes.put(COLUMN_HAS_NOTES, 1);
+            mDB.update(TABLE_NAME, cv_hasNotes, COLUMN_HABIT_NAME+"=?", new String[]{habitString});
+            updateHabitsCursor();
+        }
+
+
         // get the current total day
         Calendar calendar = Calendar.getInstance();
         int year = calendar.get(Calendar.YEAR);
@@ -312,4 +321,22 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             mDB.updateWithOnConflict(LOG_TABLE_NAME, cv,LOG_COLUMN_HABIT+"=? AND "+LOG_COLUMN_TOTAL_DAY+"=?", new String[]{habitString, totalDayString}, SQLiteDatabase.CONFLICT_REPLACE );
         }
     }
+
+
+    public void history(View view){
+
+        mAdapter.closeExpandedHabit();
+
+        // get the pressed habit
+        MyConstraintLayout myConstraintLayout = (MyConstraintLayout) view.getParent();
+        TextView tv = myConstraintLayout.findViewById(R.id.habit);
+        String habitString = tv.getText().toString();
+
+        // start activity
+        Intent intent = new Intent(this, LogActivity.class);
+        intent.putExtra("habit", habitString);
+        intent.putExtra("activity", MainActivity.class);
+        startActivity(intent);
+    }
+
 }
