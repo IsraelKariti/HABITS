@@ -95,7 +95,6 @@ public class MyAdapter extends RecyclerView.Adapter<MyViewHolder> {
         int temp = expandedIndex;
         expandedIndex = -1;
         if(temp != -1){
-            Log.i("XXXX", "CLOSE EXPANDED INDEX: "+String.valueOf(temp));
             notifyItemChanged(temp);
         }
     }

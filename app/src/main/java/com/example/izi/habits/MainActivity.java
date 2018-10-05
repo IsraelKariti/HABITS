@@ -277,8 +277,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         int dayInMonth = calendar.get(Calendar.DAY_OF_MONTH);
         int dayInYear = calendar.get(Calendar.DAY_OF_YEAR);
         int totalDay = (year-1)*365 + dayInYear;
-        Log.i("XXXX", "TOTAL DAY (IN MAIN ACTIVITY): "+String.valueOf(totalDay));
-        Log.i("XXXX", "day in year (IN MAIN ACTIVITY): "+String.valueOf(dayInYear));
 
         String totalDayString = String.valueOf(totalDay);
 
@@ -291,7 +289,6 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         mDB = mSQL.getReadableDatabase();
         Cursor cursor = mDB.query(LOG_TABLE_NAME, new String[]{"*"}, LOG_COLUMN_HABIT+"=? AND "+LOG_COLUMN_TOTAL_DAY+"=?", new String[]{habitString, totalDayString}, null, null, null);
         if(cursor.getCount() == 0){
-            Log.i("XXXXX", "FIRST ENTRY");
             // this is the first entry for this day
             mDB = mSQL.getWritableDatabase();
             ContentValues cv = new ContentValues();
@@ -307,13 +304,10 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
         }
         else{
-            Log.i("XXXXXX", "JUST ANOTHER ENTRY");
             cursor.moveToFirst();
             int noteCount = cursor.getInt(6);
-            Log.i("XXXXXX", "notecount is: "+String.valueOf(noteCount));
 
             int updateNoteCount = ++noteCount;
-            Log.i("XXXXXX", "updatedNotecount is: "+String.valueOf(updateNoteCount));
 
             int startTime = cursor.getInt(7);
             int updatedDuration = totalMinute - startTime;

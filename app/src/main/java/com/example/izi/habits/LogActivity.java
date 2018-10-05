@@ -51,15 +51,11 @@ public class LogActivity extends AppCompatActivity {
         mCursor = mDB.query(LOG_TABLE_NAME, new String[]{"*"}, LOG_COLUMN_HABIT+"=?", new String[]{habitString}, null, null, null);
 
         mCursor.moveToFirst();
-        Log.i("XXXX", "MOVE TO FIRST");
 
         // create the list
         List<Entry> entries_by_count = new ArrayList<Entry>();
         while(mCursor.isAfterLast() == false){
             int x = mCursor.getInt(2);
-//            int year = mCursor.getInt(3);
-//            int month = mCursor.getInt(4);
-//            int day = mCursor.getInt(5);
             int y = mCursor.getInt(6);
             entries_by_count.add(new Entry(x,y));
             mCursor.moveToNext();
