@@ -27,6 +27,9 @@ public class LogActivity extends AppCompatActivity {
     SQLiteDatabase mDB;
     Cursor mCursor;
 
+    String dayName;
+    String monthName;
+    String yearName;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,10 +57,10 @@ public class LogActivity extends AppCompatActivity {
         List<Entry> entries_by_count = new ArrayList<Entry>();
         while(mCursor.isAfterLast() == false){
             int x = mCursor.getInt(2);
-            int y = mCursor.getInt(6);
 //            int year = mCursor.getInt(3);
 //            int month = mCursor.getInt(4);
 //            int day = mCursor.getInt(5);
+            int y = mCursor.getInt(6);
             entries_by_count.add(new Entry(x,y));
             mCursor.moveToNext();
         }
@@ -77,6 +80,7 @@ public class LogActivity extends AppCompatActivity {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
         xAxis.setLabelRotationAngle(-90);
+        xAxis.setValueFormatter(new MyValueFormatter());
 
         YAxis yAxis_right = lineChart.getAxisRight();
         yAxis_right.setEnabled(false);

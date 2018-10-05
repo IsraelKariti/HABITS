@@ -276,7 +276,10 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         int month = calendar.get(Calendar.MONTH) + 1; // change 0-based month 1-based month
         int dayInMonth = calendar.get(Calendar.DAY_OF_MONTH);
         int dayInYear = calendar.get(Calendar.DAY_OF_YEAR);
-        int totalDay = year*365 + dayInYear;
+        int totalDay = (year-1)*365 + dayInYear;
+        Log.i("XXXX", "TOTAL DAY (IN MAIN ACTIVITY): "+String.valueOf(totalDay));
+        Log.i("XXXX", "day in year (IN MAIN ACTIVITY): "+String.valueOf(dayInYear));
+
         String totalDayString = String.valueOf(totalDay);
 
         // get the minute
