@@ -8,11 +8,21 @@
     android:focusableInTouchMode="true"
     tools:context=".MainActivity">
 
+
+
     <android.support.constraint.ConstraintLayout
         android:id="@+id/layout"
         android:focusableInTouchMode="true"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/my_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:elevation="4dp"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
         <Button
             android:id="@+id/btnNotify"
@@ -22,17 +32,18 @@
             android:onClick="add_habit"
             app:layout_constraintDimensionRatio="w,1:1"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/my_toolbar" />
 
         <EditText
             android:id="@+id/editText"
             android:layout_width="0dp"
             android:layout_height="60dp"
+            android:layout_marginTop="8dp"
             android:hint="enter a habit"
             app:layout_constraintEnd_toStartOf="@+id/btnNotify"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@+id/my_toolbar" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recycler_view"

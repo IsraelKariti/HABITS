@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -40,6 +41,23 @@ public class LogActivity extends AppCompatActivity {
         lineChart.setScaleYEnabled(false);
         lineChart.getDescription().setEnabled(false);
         lineChart.getLegend().setEnabled(false);
+        lineChart.setDragEnabled(true);
+
+
+        // style Axises
+        XAxis xAxis = lineChart.getXAxis();
+        xAxis.setDrawGridLines(false);
+        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setGranularity(1f);
+        xAxis.setLabelRotationAngle(-90);
+        xAxis.setValueFormatter(new MyValueFormatter());
+
+        YAxis yAxis_right = lineChart.getAxisRight();
+        yAxis_right.setEnabled(false);
+
+        YAxis yAxis_left = lineChart.getAxisLeft();
+        yAxis_left.setDrawGridLines(false);
+        yAxis_left.setGranularity(1.0f);
 
         // get the habit that suppose to be shown
         Intent intent = getIntent();
@@ -61,6 +79,15 @@ public class LogActivity extends AppCompatActivity {
             mCursor.moveToNext();
         }
 
+        mCursor.moveToFirst();
+        List<Entry> entries_by_duration = new ArrayList<Entry>();
+        while(mCursor.isAfterLast() == false){
+            int x = mCursor.getInt(2);
+            int y = mCursor.getInt(8);
+            entries_by_count.add(new Entry(x,y));
+            mCursor.moveToNext();
+        }
+
         // style the dataset
         LineDataSet dataSet = new LineDataSet(entries_by_count, "Label");
         dataSet.setLineWidth(5);
@@ -68,25 +95,21 @@ public class LogActivity extends AppCompatActivity {
         dataSet.setDrawHighlightIndicators(false);
         LineData data = new LineData(dataSet);
 
+        // style dataset - durationset
+        LineDataSet dataSet_duration = new LineDataSet(entries_by_duration, "Label");
+        dataSet_duration.setLineWidth(5);
+        dataSet_duration.setDrawValues(false);
+        dataSet_duration.setDrawHighlightIndicators(false);
+        LineData data_duration = new LineData(dataSet_duration);
+
         lineChart.setData(data);
-        lineChart.setDragEnabled(true);
-
-        XAxis xAxis = lineChart.getXAxis();
-        xAxis.setDrawGridLines(false);
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setGranularity(1f);
-        xAxis.setLabelRotationAngle(-90);
-        xAxis.setValueFormatter(new MyValueFormatter());
-
-        YAxis yAxis_right = lineChart.getAxisRight();
-        yAxis_right.setEnabled(false);
-
-        YAxis yAxis_left = lineChart.getAxisLeft();
-        yAxis_left.setDrawGridLines(false);
-        yAxis_left.setGranularity(1.0f);
 
         lineChart.invalidate();
 
         lineChart.setVisibleXRangeMaximum(5.0f);
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        setTitle(habitString);
     }
 }
