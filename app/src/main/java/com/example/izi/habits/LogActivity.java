@@ -49,7 +49,7 @@ public class LogActivity extends AppCompatActivity {
         lineChart.getDescription().setEnabled(false);
         lineChart.getLegend().setEnabled(false);
         lineChart.setDragEnabled(true);
-
+        lineChart.setExtraOffsets(10, 0, 0, 10);
 
         // style Axises
         XAxis xAxis = lineChart.getXAxis();
@@ -123,18 +123,6 @@ public class LogActivity extends AppCompatActivity {
         // ranges MUST be declared AFTER INVALIDATE
         lineChart.setVisibleXRangeMinimum(3f);
         lineChart.setVisibleXRangeMaximum(15f);
-
-        ////////////////////////TRY//////////////////////
-        float x1 = entries_by_count.get(0).getX();
-
-        if(lineChart.getHighlighter()== null)
-            Log.i("XXXXXXXX", "HIGHLIGHTER NULL");
-        else
-            Log.i("XXXXXXXX", "HIGHLIGHTER notttt NULL");
-
-        lineChart.highlightValue(lineChart.getHighlighter().getHighlight(x1, 0));
-
-        /////////////////////////////////////////////////
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
