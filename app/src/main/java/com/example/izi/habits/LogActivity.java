@@ -1,4 +1,7 @@
 package com.example.izi.habits;
+/**
+ * I used MPAndroidChart library for the graph (in case i forget on day)
+ */
 
 import android.content.Intent;
 import android.database.Cursor;
