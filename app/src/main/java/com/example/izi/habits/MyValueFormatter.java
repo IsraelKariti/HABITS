@@ -19,26 +19,38 @@ public class MyValueFormatter implements IAxisValueFormatter {
     @Override
     public String getFormattedValue(float value, AxisBase axis) {
         int totalDays = (int) value;
-        Log.i("XXXX", "total days: "+String.valueOf(totalDays));
-        int pastDays = 2017*365; // 2017 full years =
-        int presentDays = totalDays - pastDays;
-        Log.i("XXXX", "present days: "+String.valueOf(presentDays));
+        int dayInYear = 0;
+        int daysIn400YRS = 146097;
+        int daysIn100YRS = 36524;
+        int daysIn4YRS = 1461;
+        int fullYear = 0;
+        int roundsOf400YRS = totalDays/daysIn400YRS;
+        totalDays = totalDays%daysIn400YRS;
+        int roundsOf100YRS = totalDays/daysIn100YRS;
+        totalDays = totalDays%daysIn100YRS;
+        int roundsOf4YRS = totalDays/daysIn4YRS;
+        totalDays = totalDays%daysIn4YRS;
+        if(totalDays > 3*365){ // if day is in the leap year
+            fullYear = roundsOf400YRS*400 + roundsOf100YRS*100 + roundsOf4YRS*4 + 3;
+            dayInYear = totalDays%3*365;
+        }
+        else{                   // if this is normal year
+            int roundsOf1YRS = totalDays/365;
+            totalDays = totalDays%365;
+            fullYear = roundsOf400YRS*400 + roundsOf100YRS*100 + roundsOf4YRS*4 + roundsOf1YRS;
+            dayInYear = totalDays;
+        }
+        year = fullYear + 1; // current year is partial, so it is one more than the amount of full years
+        Log.i("XXXXX", "YEAR FINAL: "+String.valueOf(year));
 
-        if(presentDays > 365 )
-            year = 2019;
-        else
-            year = 2018;
 
-        Log.i("XXXX", "year: "+String.valueOf(year));
-
-        int dayInYear = presentDays%365;
         if( dayInYear<=31) {
             month = 1;
             day = dayInYear;
         }
         else if (dayInYear <= 59) {
             month = 2;
-            day = dayInYear = 31;
+            day = dayInYear - 31;
         }
         else if(dayInYear <= 90) {
             month = 3;

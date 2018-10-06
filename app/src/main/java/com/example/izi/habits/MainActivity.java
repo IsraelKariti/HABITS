@@ -290,8 +290,10 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         int month = calendar.get(Calendar.MONTH) + 1; // change 0-based month 1-based month
         int dayInMonth = calendar.get(Calendar.DAY_OF_MONTH);
         int dayInYear = calendar.get(Calendar.DAY_OF_YEAR);
-        int totalDay = (year-1)*365 + dayInYear;
+        Log.i("XXXX", "TOTAL DAY: "+String.valueOf(dayInYear));
 
+        int totalDay = daysInYears(year-1) + dayInYear; // calculate what day is it (on calendar) when Jan 1st 0001 is the first day of all time
+        Log.i("XXXX", "TOTAL DAY: "+String.valueOf(totalDay));
         String totalDayString = String.valueOf(totalDay);
 
         // get the minute
@@ -331,6 +333,18 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             cv.put(LOG_COLUMN_DURATION, updatedDuration);
             mDB.updateWithOnConflict(LOG_TABLE_NAME, cv,LOG_COLUMN_HABIT+"=? AND "+LOG_COLUMN_TOTAL_DAY+"=?", new String[]{habitString, totalDayString}, SQLiteDatabase.CONFLICT_REPLACE );
         }
+    }
+
+    private int daysInYears(int years) {
+        Log.i("XXXXX", String.valueOf(years));
+        int incubatedYRS4 = years / 4;
+        int incubatedYRS100 = years / 100;
+        int incubatedYRS400 = years / 400;
+        int incubatedYRS = incubatedYRS4 - incubatedYRS100 + incubatedYRS400;
+        int normalYRS = years - incubatedYRS;
+        int res = normalYRS*365 + incubatedYRS*366;
+        Log.i("XXXXX", "DAYS "+String.valueOf(res));
+        return res;
     }
 
 
