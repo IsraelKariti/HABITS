@@ -3,6 +3,7 @@ package com.example.izi.habits;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -55,7 +56,7 @@ public class LogActivity extends AppCompatActivity {
         xAxis.setDrawGridLines(false);
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setGranularity(1f);
-        xAxis.setLabelRotationAngle(-90);
+        xAxis.setLabelRotationAngle(-45);
         xAxis.setValueFormatter(new MyValueFormatter());
 
         YAxis yAxis_right = lineChart.getAxisRight();
@@ -77,7 +78,7 @@ public class LogActivity extends AppCompatActivity {
         mCursor.moveToFirst();
         // create the list
         List<Entry> entries_by_count = new ArrayList<Entry>();
-        while(mCursor.isAfterLast() == false){
+        while(!mCursor.isAfterLast()){
             int x = mCursor.getInt(2);
             int y = mCursor.getInt(6);
             entries_by_count.add(new Entry(x,y));
@@ -86,7 +87,7 @@ public class LogActivity extends AppCompatActivity {
 
         mCursor.moveToFirst();
         List<Entry> entries_by_duration = new ArrayList<Entry>();
-        while(mCursor.isAfterLast() == false){
+        while(!mCursor.isAfterLast()){
             int x = mCursor.getInt(2);
             int y = mCursor.getInt(8);
             entries_by_duration.add(new Entry(x,y));
@@ -95,23 +96,45 @@ public class LogActivity extends AppCompatActivity {
 
         // style the dataset
         LineDataSet dataSet = new LineDataSet(entries_by_count, "Label");
-        dataSet.setLineWidth(5);
+        dataSet.setLineWidth(7);
         dataSet.setDrawValues(false);
         dataSet.setDrawHighlightIndicators(false);
+        dataSet.setCircleColor(Color.BLUE);
+        dataSet.setCircleRadius(5f);
+        dataSet.setCircleColorHole(Color.WHITE);
+        dataSet.setCircleHoleRadius(2f);
         data_count = new LineData(dataSet);
 
         // style dataset - durationset
         LineDataSet dataSet_duration = new LineDataSet(entries_by_duration, "Label");
-        dataSet_duration.setLineWidth(5);
+        dataSet_duration.setLineWidth(7);
         dataSet_duration.setDrawValues(false);
         dataSet_duration.setDrawHighlightIndicators(false);
+        dataSet_duration.setCircleColor(Color.BLUE);
+        dataSet_duration.setCircleRadius(5f);
+        dataSet_duration.setCircleColorHole(Color.WHITE);
+        dataSet_duration.setCircleHoleRadius(2f);
         data_duration = new LineData(dataSet_duration);
 
         lineChart.setData(data_count);
         dataIsCount = true;
         lineChart.invalidate();
 
-        lineChart.setVisibleXRangeMaximum(5.0f);
+        // ranges MUST be declared AFTER INVALIDATE
+        lineChart.setVisibleXRangeMinimum(3f);
+        lineChart.setVisibleXRangeMaximum(15f);
+
+        ////////////////////////TRY//////////////////////
+        float x1 = entries_by_count.get(0).getX();
+
+        if(lineChart.getHighlighter()== null)
+            Log.i("XXXXXXXX", "HIGHLIGHTER NULL");
+        else
+            Log.i("XXXXXXXX", "HIGHLIGHTER notttt NULL");
+
+        lineChart.highlightValue(lineChart.getHighlighter().getHighlight(x1, 0));
+
+        /////////////////////////////////////////////////
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
