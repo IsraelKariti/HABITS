@@ -75,7 +75,6 @@ public class LogActivity extends AppCompatActivity {
         mCursor = mDB.query(LOG_TABLE_NAME, new String[]{"*"}, LOG_COLUMN_HABIT+"=?", new String[]{mHabitString}, null, null, null);
 
         mCursor.moveToFirst();
-        Log.i("XXXXXXX", "SIZE IS : "+String.valueOf(mCursor.getCount()));
         // create the list
         List<Entry> entries_by_count = new ArrayList<Entry>();
         while(mCursor.isAfterLast() == false){
@@ -83,7 +82,6 @@ public class LogActivity extends AppCompatActivity {
             int y = mCursor.getInt(6);
             entries_by_count.add(new Entry(x,y));
             mCursor.moveToNext();
-            Log.i("XXXXX", "COUNT");
         }
 
         mCursor.moveToFirst();
@@ -93,7 +91,6 @@ public class LogActivity extends AppCompatActivity {
             int y = mCursor.getInt(8);
             entries_by_duration.add(new Entry(x,y));
             mCursor.moveToNext();
-            Log.i("XXXXX", "X: "+String.valueOf(x)+" Y: "+String.valueOf(y));
         }
 
         // style the dataset

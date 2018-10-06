@@ -139,9 +139,6 @@ public class MyValueFormatter implements IAxisValueFormatter {
             }
         }
         year = fullYear + 1; // current year is partial, so it is one more than the amount of full years
-        Log.i("XXXXX", "YEAR FINAL: "+String.valueOf(year));
-
-
 
         String dayName = String.valueOf(day);
         String monthName = String.valueOf(month);
