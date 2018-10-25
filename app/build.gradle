@@ -23,6 +23,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'com.android.support:support-fragment:27.1.1'
     implementation 'com.github.PhilJay:MPAndroidChart:v3.0.3'
+    implementation "android.arch.work:work-runtime:1.0.0-alpha10" // use -ktx for Kotlin
 
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.android.support:recyclerview-v7:27.1.1'

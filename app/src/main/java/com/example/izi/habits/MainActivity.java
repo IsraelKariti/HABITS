@@ -1,12 +1,18 @@
 package com.example.izi.habits;
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,6 +31,11 @@ import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.MissingResourceException;
+import java.util.concurrent.TimeUnit;
+
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_DAY;
 import static com.example.izi.habits.MyContract.LogTable.LOG_COLUMN_DURATION;
@@ -53,12 +64,11 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     MyDialogFragment myDialogFragment;
     FragmentManager fragmentManager;
     boolean refocusEditText;
-
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        Intent intent = new Intent(this, LogActivity.class);
-//        startActivity(intent);
 
         setContentView(R.layout.activity_main);
 
@@ -105,6 +115,14 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+
+        // call the service that creates new logs (with count of zero) everyday at midnight for each habits
+        Intent intentService = new Intent(this, MyService.class);
+        if (!isMyServiceRunning(MyService.class)) {
+            startService(intentService);
+
+        }
+
     }
 
     private EditText getEditText() {
@@ -148,15 +166,42 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             return;
         }
         closeSoftKeyboard();
+
+        // insert this new habit into HABITS table
         mDB = mSQL.getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put(COLUMN_HABIT_NAME, habit);
         cv.put(COLUMN_HAS_NOTES, 0);
         mDB.insertWithOnConflict(TABLE_NAME, null, cv, SQLiteDatabase.CONFLICT_REPLACE);
+
+        // clean edittext
         mEditText.setText("");
+
         updateHabitsCursor();
         Toast.makeText(MainActivity.this, "Habit was added", Toast.LENGTH_SHORT).show();
         mRecyclerView.requestFocus();
+
+        // get the current total day
+        Calendar calendar = Calendar.getInstance();
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH) + 1; // change 0-based month 1-based month
+        int dayInMonth = calendar.get(Calendar.DAY_OF_MONTH);
+        int dayInYear = calendar.get(Calendar.DAY_OF_YEAR);
+        int totalDay = daysInYears(year-1) + dayInYear; // calculate what day is it (on calendar) when Jan 1st 0001 is the first day of all time
+
+        // insert this new habit into LOG table
+        mDB = mSQL.getWritableDatabase();
+        ContentValues cv_new = new ContentValues();
+        cv_new.put(LOG_COLUMN_HABIT, habit);
+        cv_new.put(LOG_COLUMN_TOTAL_DAY, totalDay);
+        cv_new.put(LOG_COLUMN_YEAR, year);
+        cv_new.put(LOG_COLUMN_MONTH, month);
+        cv_new.put(LOG_COLUMN_DAY, dayInMonth);
+        cv_new.put(LOG_COLUMN_NOTE_COUNT, 0);
+        cv_new.put(LOG_COLUMN_STARTING_TIME, -1);
+        cv_new.put(LOG_COLUMN_DURATION, 0);
+        mDB.insert(LOG_TABLE_NAME, null, cv_new);
+
     }
 
     public void updateHabitsCursor(){
@@ -242,6 +287,9 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         // delete from LOG table
         mDB = mSQL.getWritableDatabase();
         mDB.delete(LOG_TABLE_NAME, LOG_COLUMN_HABIT+"=?", new String[]{string});
+
+        // remove item from indexExpanded
+        mAdapter.expandedIndex = -1;
     }
 
 
@@ -296,25 +344,22 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
 
         // get the minute
         int minute = calendar.get(Calendar.MINUTE);
-        int hour = calendar.get(Calendar.HOUR);
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int totalMinute = hour*60+minute;
 
         // check if this button was clicked today already
         mDB = mSQL.getReadableDatabase();
         Cursor cursor = mDB.query(LOG_TABLE_NAME, new String[]{"*"}, LOG_COLUMN_HABIT+"=? AND "+LOG_COLUMN_TOTAL_DAY+"=?", new String[]{habitString, totalDayString}, null, null, null);
-        if(cursor.getCount() == 0){
+        cursor.moveToFirst();
+        Log.i("XXXX", ""+cursor.getCount());
+        if(cursor.getInt(7) == -1){
             // this is the first entry for this day
             mDB = mSQL.getWritableDatabase();
             ContentValues cv = new ContentValues();
-            cv.put(LOG_COLUMN_HABIT, habitString);
-            cv.put(LOG_COLUMN_TOTAL_DAY, totalDay);
-            cv.put(LOG_COLUMN_YEAR, year);
-            cv.put(LOG_COLUMN_MONTH, month);
-            cv.put(LOG_COLUMN_DAY, dayInMonth);
             cv.put(LOG_COLUMN_NOTE_COUNT, 1);
             cv.put(LOG_COLUMN_STARTING_TIME, totalMinute);
-            cv.put(LOG_COLUMN_DURATION, 0);
-            mDB.insert(LOG_TABLE_NAME, null, cv);
+            cv.put(LOG_COLUMN_DURATION, 0  );
+            mDB.update(LOG_TABLE_NAME, cv, LOG_COLUMN_HABIT+"=?", new String[]{habitString});
 
         }
         else{
@@ -360,4 +405,22 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         startActivity(intent);
     }
 
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                Log.i ("isMyServiceRunning?", true+"");
+                return true;
+            }
+        }
+        Log.i ("isMyServiceRunning?", false+"");
+        return false;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent = new Intent(this, MyService.class);
+        stopService(intent);
+    }
 }
