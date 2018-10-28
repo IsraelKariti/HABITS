@@ -119,8 +119,8 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         // call the service that creates new logs (with count of zero) everyday at midnight for each habits
         Intent intentService = new Intent(this, MyService.class);
         if (!isMyServiceRunning(MyService.class)) {
+            Log.i("XXXX", "START SERVICE");
             startService(intentService);
-
         }
 
     }

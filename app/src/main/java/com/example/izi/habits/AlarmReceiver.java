@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.util.Log;
 
 import java.util.Calendar;
 
@@ -17,6 +18,10 @@ public class AlarmReceiver extends BroadcastReceiver {
     private PendingIntent alarmIntent;
     @Override
     public void onReceive(Context context, Intent intent) {
+
+        Log.i("XXXX", "alarm receiver:::ON RECEIVE");
+
+
         // boom notification
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context, "myid")
                 .setSmallIcon(R.drawable.ic_toys_black_24dp)
@@ -37,7 +42,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         //  WHEN
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.add(Calendar.HOUR_OF_DAY, 24);
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
